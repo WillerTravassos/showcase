@@ -1,0 +1,15 @@
+edition = "2024"
+# version = "Two"  # Use the improved formatting engine
+
+# Formatting Rules
+max_width = 120
+use_small_heuristics = "Max"
+newline_style = "Unix"
+
+# Import Management (Reduces merge conflicts)
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
+
+# Visual Improvements
+# enum_discrim_align_threshold = 20
+# struct_field_align_threshold = 20
