@@ -7,6 +7,8 @@ KIND_VERSION := 0.31.0
 KIND_CLUSTER_CONFIG := $(CURDIR)/tilt/cluster.yaml
 
 RUST_MANIFEST_PATH := ./online-pong/Cargo.toml
+RUST_TEST_PACKAGE ?=
+RUST_TEST_NAME_MATCH ?=
 
 TILT_VERSION := 0.37.3
 
@@ -86,13 +88,13 @@ rust-build:
 rust-check:
 	cargo check --manifest-path $(RUST_MANIFEST_PATH)
 
-.PHONY: rust-clippy 
-rust-clippy:
-	cargo clippy --manifest-path $(RUST_MANIFEST_PATH) --all-targets --all-features -- -D warnings
-
 .PHONY: rust-format 
 rust-format:
 	cargo +nightly fmt --manifest-path $(RUST_MANIFEST_PATH)
+
+.PHONY: rust-lint
+rust-lint:
+	cargo clippy --manifest-path $(RUST_MANIFEST_PATH) --all --all-targets --all-features -- -D warnings
 
 .PHONY: rust-release
 rust-release:
@@ -109,4 +111,8 @@ rust-open-doc:
 .PHONY: rust-fix
 rust-fix:
 	cargo fix --allow-dirty --manifest-path $(RUST_MANIFEST_PATH)
+
+.PHONY: rust-test
+rust-test:
+	cargo test --manifest-path $(RUST_MANIFEST_PATH) -p $(RUST_TEST_PACKAGE) $(RUST_TEST_NAME_MATCH)
 
