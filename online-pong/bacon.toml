@@ -1,0 +1,27 @@
+default_job = "clippy-all"
+
+[jobs.clippy]
+command = [
+  "cargo",
+  "clippy",
+  "--all-targets",
+  "--all-features",
+  "--color",
+  "always"
+]
+need_stdout = false
+on_success = "back"
+
+[jobs.clippy-all]
+command = [
+  "cargo",
+  "clippy",
+  "--all-targets",
+  "--all-features",
+  "--color",
+  "always",
+  "--",
+  "-D",
+  "warnings"
+]
+need_stdout = false

@@ -76,12 +76,15 @@ impl Chip8 {
     pub fn new() -> Self {
         let mut memory = [0u8; 4096];
 
-        for i in 0..FONTSET_SIZE {
-            memory[FONTSET_START_ADDRESS + i] = FONTSET[i]
-        }
+        // NOTE: This effectively replaces the for loop bellow:
+        // for i in 0..FONTSET_SIZE {
+        //     memory[FONTSET_START_ADDRESS + i] = FONTSET[i];
+        // }
+
+        memory[FONTSET_START_ADDRESS..(FONTSET_SIZE + FONTSET_START_ADDRESS)].copy_from_slice(&FONTSET);
 
         Self {
-            memory: memory,
+            memory,
             registers: [0u8; 16],
             index_register: 0u16,
             program_counter: START_ADDRESS,
@@ -92,6 +95,12 @@ impl Chip8 {
             display: [false; DISPLAY_WIDTH * DISPLAY_HEIGHT],
             keypad: [false; 16],
         }
+    }
+}
+
+impl Default for Chip8 {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -108,6 +117,6 @@ mod chip_core_tests {
         let chip8_emulator = Chip8::new();
 
         assert_eq!(chip8_emulator.program_counter, START_ADDRESS);
-        assert_eq!(&chip8_emulator.memory[fontset_start_address..fontset_end_address], &FONTSET)
+        assert_eq!(&chip8_emulator.memory[fontset_start_address..fontset_end_address], &FONTSET);
     }
 }
