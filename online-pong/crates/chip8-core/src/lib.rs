@@ -3,6 +3,15 @@
 //! Intentionally I/O-free: no file system, no network, no audio, no wall-clock
 //! time. Given the same inputs it always produces the same outputs, making
 //! deterministic snapshot-based rollback tractable.
+//!
+//! # Examples
+//! ```
+//! let chip8 = chip8_core::Chip8::new();
+//! ```
+//!
+//! ```
+//! let chip8 = chip8_core::Chip8::default();
+//! ```
 
 /// Height of the CHIP-8 display in pixels.
 pub const DISPLAY_HEIGHT: usize = 32;
@@ -52,15 +61,15 @@ pub struct Chip8 {
     memory: [u8; MEMORY_SIZE],
     /// 16 general purpose 8bit registers (V0 to VF). VF a special byte that acts as flag to check if
     /// carry, borrow, or collision
-    registers: [u8; 16],
+    v: [u8; 16],
     /// Index registers hold memory addresses. Addresses are 12-bit
-    index_register: u16,
+    i: u16,
     /// Program counter points to the current emulator instruction
-    program_counter: u16,
+    pc: u16,
     /// Hardware call stack for subroutines. It stores the 16-bit return addresses
     stack: [u16; 16],
     /// Index into stack
-    stack_pointer: u8,
+    sp: u8,
     /// Counts down at 60Hz, general-purpose timing
     delay_timer: u8,
     /// Counts down at 60Hz, same as delay timer, but for sounds
@@ -85,11 +94,11 @@ impl Chip8 {
 
         Self {
             memory,
-            registers: [0u8; 16],
-            index_register: 0u16,
-            program_counter: START_ADDRESS,
+            v: [0u8; 16],
+            i: 0u16,
+            pc: START_ADDRESS,
             stack: [0u16; 16],
-            stack_pointer: 0u8,
+            sp: 0u8,
             delay_timer: 0u8,
             sound_timer: 0u8,
             display: [false; DISPLAY_WIDTH * DISPLAY_HEIGHT],
@@ -116,7 +125,7 @@ mod chip_core_tests {
         let fontset_end_address = FONTSET_START_ADDRESS + FONTSET_SIZE;
         let chip8_emulator = Chip8::new();
 
-        assert_eq!(chip8_emulator.program_counter, START_ADDRESS);
+        assert_eq!(chip8_emulator.pc, START_ADDRESS);
         assert_eq!(&chip8_emulator.memory[fontset_start_address..fontset_end_address], &FONTSET);
     }
 }
