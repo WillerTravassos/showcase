@@ -92,7 +92,7 @@ rust-clippy:
 
 .PHONY: rust-format 
 rust-format:
-	cargo fmt --manifest-path $(RUST_MANIFEST_PATH)
+	cargo +nightly fmt --manifest-path $(RUST_MANIFEST_PATH)
 
 .PHONY: rust-release
 rust-release:
