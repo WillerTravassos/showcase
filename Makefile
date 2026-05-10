@@ -12,6 +12,9 @@ RUST_TEST_NAME_MATCH ?=
 
 TILT_VERSION := 0.37.3
 
+# Shared logic to decide between -p package or --workspace
+_RUST_TEST_PACKAGE_TARGET = $(if $(RUST_TEST_PACKAGE),-p $(RUST_TEST_PACKAGE),--workspace)
+
 #####################################
 # Cluster
 #####################################
@@ -118,7 +121,10 @@ rust-fix:
 
 .PHONY: rust-test
 rust-test:
-	cargo test --manifest-path $(RUST_MANIFEST_PATH) \
-		$(if $(RUST_TEST_PACKAGE), -p $(RUST_TEST_PACKAGE),--workspace) \
-		$(RUST_TEST_NAME_MATCH)
+	# --all-targets only includes binaries, libraries, integration tests, and benchmarks, but specifically excludes doc tests. Reason is to split doc tests, since they can be slower
+	cargo test --manifest-path $(RUST_MANIFEST_PATH) $(_RUST_TEST_PACKAGE_TARGET) $(RUST_TEST_NAME_MATCH) --all-targets
+
+.PHONY: rust-test-doc
+rust-test-doc:
+	cargo test --doc --manifest-path $(RUST_MANIFEST_PATH) $(_RUST_TEST_PACKAGE_TARGET) $(RUST_TEST_NAME_MATCH)
 
