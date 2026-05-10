@@ -8,7 +8,7 @@ KIND_CLUSTER_CONFIG := $(CURDIR)/tilt/cluster.yaml
 
 RUST_MANIFEST_PATH := ./online-pong/Cargo.toml
 
-TILT_VERSION := 0.36.3
+TILT_VERSION := 0.37.3
 
 #####################################
 # Cluster
@@ -28,11 +28,11 @@ cluster-reset:
 
 .PHONY: tilt-down
 tilt-down:
-	@/tools/tilt down
+	@./tools/tilt down
 
 .PHONY: tilt-up
 tilt-up: cluster-create
-	@/tools/tilt up
+	@./tools/tilt up
 
 #####################################
 # Tooling
@@ -53,8 +53,8 @@ install-kind:
 
 .PHONY: install-tilt
 install-tilt:
-	@echo "=> Install Kind local cluster ${KIND_VERSION}"
-	@bash -c "source $(CURDIR)/scripts/tools/install-tilt.sh ${KIND_VERSION}"
+	@echo "=> Install Kind local cluster ${TILT_VERSION}"
+	@bash -c "source $(CURDIR)/scripts/tools/install-tilt.sh ${TILT_VERSION}"
 
 #####################################
 # Golang
