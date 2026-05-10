@@ -96,6 +96,10 @@ rust-format:
 rust-lint:
 	cargo clippy --manifest-path $(RUST_MANIFEST_PATH) --all --all-targets --all-features -- -D warnings
 
+.PHONY: rust-lint-fix
+rust-lint-fix:
+	cargo clippy --manifest-path $(RUST_MANIFEST_PATH) --all --all-targets --all-features --fix --allow-dirty -- -D warnings
+
 .PHONY: rust-release
 rust-release:
 	cargo build --release --manifest-path $(RUST_MANIFEST_PATH)
@@ -114,5 +118,7 @@ rust-fix:
 
 .PHONY: rust-test
 rust-test:
-	cargo test --manifest-path $(RUST_MANIFEST_PATH) -p $(RUST_TEST_PACKAGE) $(RUST_TEST_NAME_MATCH)
+	cargo test --manifest-path $(RUST_MANIFEST_PATH) \
+		$(if $(RUST_TEST_PACKAGE), -p $(RUST_TEST_PACKAGE),--workspace) \
+		$(RUST_TEST_NAME_MATCH)
 
