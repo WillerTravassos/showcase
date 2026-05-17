@@ -3,15 +3,11 @@
 //! Intentionally I/O-free: no file system, no network, no audio, no wall-clock
 //! time. Given the same inputs it always produces the same outputs, making
 //! deterministic snapshot-based rollback tractable.
-//!
-//! # Examples
-//! ```
-//! let chip8 = chip8_core::Chip8::new();
-//! ```
-//!
-//! ```
-//! let chip8 = chip8_core::Chip8::default();
-//! ```
+
+/// Errors module containing all errors that may be returned during the run of a CHIP-8 ROM
+pub mod error;
+
+pub use error::{Error, Result};
 
 /// Height of the CHIP-8 display in pixels.
 pub const DISPLAY_HEIGHT: usize = 32;
@@ -51,6 +47,9 @@ pub const MEMORY_SIZE: usize = 4096;
 /// Programs always start on the address defined here.
 pub const START_ADDRESS: u16 = 0x200;
 
+/// Maximum allowed size for CHIP-8 ROMs is 3584 bytes.
+pub const MAX_ROM_SIZE: usize = MEMORY_SIZE - (START_ADDRESS as usize);
+
 /// Models the hardware state of the CHIP-8 virtual machine.
 ///
 /// Every field maps to a physical component of the original COSMAC VIP.
@@ -82,6 +81,10 @@ pub struct Chip8 {
 
 impl Chip8 {
     /// Initiates a new CHIP-8 emulator core
+    /// # Examples
+    /// ```
+    /// let chip8 = chip8_core::Chip8::new();
+    /// ```
     pub fn new() -> Self {
         let mut memory = [0u8; 4096];
 
@@ -89,7 +92,6 @@ impl Chip8 {
         // for i in 0..FONTSET_SIZE {
         //     memory[FONTSET_START_ADDRESS + i] = FONTSET[i];
         // }
-
         memory[FONTSET_START_ADDRESS..(FONTSET_SIZE + FONTSET_START_ADDRESS)].copy_from_slice(&FONTSET);
 
         Self {
@@ -105,9 +107,34 @@ impl Chip8 {
             keypad: [false; 16],
         }
     }
+
+    /// Loads a rom at the program starting address of the CHIP-8 emulator.
+    /// # Errors
+    ///
+    /// Will return `RomTooLarge { size: rom_size }` if `rom` is larger than the allowed ROM size of 3584 bytes (`MAX_ROM_SIZE`).
+    #[must_use = "Must check Result to ensure ROM is loaded"]
+    pub fn load_rom(&mut self, rom: &[u8]) -> Result<()> {
+        let rom_size = rom.len();
+
+        if rom_size > MAX_ROM_SIZE {
+            return Err(Error::RomTooLarge { size: rom_size });
+        }
+
+        let start_address = START_ADDRESS as usize;
+        let end_address = rom_size + start_address;
+
+        self.memory[start_address..end_address].copy_from_slice(rom);
+
+        Ok(())
+    }
 }
 
 impl Default for Chip8 {
+    /// Initiates a new CHIP-8 emulator core with default configuration.
+    /// # Examples
+    /// ```
+    /// let chip8 = chip8_core::Chip8::default();
+    /// ```
     fn default() -> Self {
         Self::new()
     }
@@ -117,7 +144,7 @@ impl Default for Chip8 {
 mod chip_core_tests {
     use pretty_assertions::assert_eq;
 
-    use crate::{Chip8, FONTSET, FONTSET_SIZE, FONTSET_START_ADDRESS, START_ADDRESS};
+    use crate::{Chip8, Error, FONTSET, FONTSET_SIZE, FONTSET_START_ADDRESS, MAX_ROM_SIZE, START_ADDRESS};
 
     #[test]
     fn new() {
@@ -127,5 +154,36 @@ mod chip_core_tests {
 
         assert_eq!(chip8_emulator.pc, START_ADDRESS);
         assert_eq!(&chip8_emulator.memory[fontset_start_address..fontset_end_address], &FONTSET);
+    }
+
+    #[test]
+    fn load_rom_succeeds() {
+        let rom: [u8; MAX_ROM_SIZE] = rand::random();
+        let mut emulator = Chip8::default();
+        let start_address = START_ADDRESS as usize;
+        let end_address = rom.len() + start_address;
+        let result = emulator.load_rom(&rom);
+
+        assert!(result.is_ok());
+        assert_eq!(&emulator.memory[start_address..end_address], &rom);
+    }
+
+    #[test]
+    fn load_rom_empty_rom_succeeds() {
+        let empty_rom = [0u8; 0];
+        let mut emulator = Chip8::default();
+        let result = emulator.load_rom(&empty_rom);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn load_rom_rom_exceeds_max_size_fails() {
+        let too_large_rom: [u8; MAX_ROM_SIZE + 1] = rand::random();
+        let mut emulator = Chip8::default();
+        let result = emulator.load_rom(&too_large_rom);
+
+        assert!(result.is_err());
+        assert_eq!(Error::RomTooLarge { size: MAX_ROM_SIZE + 1 }, result.unwrap_err());
     }
 }
