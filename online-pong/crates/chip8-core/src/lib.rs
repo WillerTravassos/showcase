@@ -127,6 +127,45 @@ impl Chip8 {
 
         Ok(())
     }
+
+    /// Process the program instruction, dispatches it, and moves to the next availabe opcode
+    /// # Errors
+    ///
+    /// Will return `chip8_core::Error` if it is unable to decode and execute a rom instruction.
+    fn tick(&mut self) -> Result<()> {
+        let opcode_start = self.pc as usize;
+        let opcode_end = opcode_start + 1;
+
+        if self.pc >= 0xFFF {
+            return Err(Error::InvalidAddress(self.pc));
+        }
+
+        let opcode = u16::from_be_bytes([self.memory[opcode_start], self.memory[opcode_end]]);
+
+        self.pc += 2;
+
+        // NOTE: The ? operator is equivalent to doing the below after called
+        // self.decode_and_executed
+        // if let Err(failed_decode) = result {
+        //     return Err(failed_decode);
+        // }
+        self.decode_and_execute(opcode)?;
+
+        Ok(())
+    }
+
+    /// Pattern matches on nibbles of opcode, i.e., the bits of the opcode and executes instruction.
+    fn decode_and_execute(&mut self, opcode: u16) -> Result<()> {
+        // Splits the 16-bit opcode into four individual 4-bit hexadecimal digits (nibbles).
+        // Example: 0x2AF5 becomes (0x2, 0xA, 0xF, 0x5) for clear pattern matching
+        let nibbles =
+            ((opcode >> 12) as u8, (opcode >> 8 & 0xF) as u8, (opcode >> 4 & 0xF) as u8, (opcode & 0xF) as u8);
+
+        match nibbles {
+            (0x0, 0x0, 0xE, 0x0) => Ok(()),
+            _ => Err(Error::InvalidOpcode(opcode)),
+        }
+    }
 }
 
 impl Default for Chip8 {
@@ -185,5 +224,31 @@ mod chip_core_tests {
 
         assert!(result.is_err());
         assert_eq!(Error::RomTooLarge { size: MAX_ROM_SIZE + 1 }, result.unwrap_err());
+    }
+
+    #[test]
+    fn tick_clear_opcode_succeeds() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x00, 0xE0]);
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_unknown_opcode_fails() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x00, 0x12]);
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_err());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
     }
 }
