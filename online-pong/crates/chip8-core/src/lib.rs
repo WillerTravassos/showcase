@@ -1,3 +1,6 @@
+#![deny(unsafe_code)]
+#![warn(missing_docs)]
+#![warn(rust_2018_idioms)]
 //! Pure CHIP-8 emulator core.
 //!
 //! Intentionally I/O-free: no file system, no network, no audio, no wall-clock
@@ -6,6 +9,13 @@
 
 /// Errors module containing all errors that may be returned during the run of a CHIP-8 ROM
 pub mod error;
+
+mod cpu;
+mod display;
+mod keypad;
+mod memory;
+mod opcodes;
+mod timers;
 
 pub use error::{Error, Result};
 
@@ -79,6 +89,7 @@ pub struct Chip8 {
     keypad: [bool; 16],
 }
 
+#[allow(dead_code)] // fields written in new(); readers added as opcodes are implemented (Epic 2)
 impl Chip8 {
     /// Initiates a new CHIP-8 emulator core
     /// # Examples
@@ -142,7 +153,7 @@ impl Chip8 {
 
         let opcode = u16::from_be_bytes([self.memory[opcode_start], self.memory[opcode_end]]);
 
-        self.pc += 2;
+        self.increase_program_counter();
 
         // NOTE: The ? operator is equivalent to doing the below after called
         // self.decode_and_executed
@@ -154,17 +165,9 @@ impl Chip8 {
         Ok(())
     }
 
-    /// Pattern matches on nibbles of opcode, i.e., the bits of the opcode and executes instruction.
-    fn decode_and_execute(&mut self, opcode: u16) -> Result<()> {
-        // Splits the 16-bit opcode into four individual 4-bit hexadecimal digits (nibbles).
-        // Example: 0x2AF5 becomes (0x2, 0xA, 0xF, 0x5) for clear pattern matching
-        let nibbles =
-            ((opcode >> 12) as u8, (opcode >> 8 & 0xF) as u8, (opcode >> 4 & 0xF) as u8, (opcode & 0xF) as u8);
-
-        match nibbles {
-            (0x0, 0x0, 0xE, 0x0) => Ok(()),
-            _ => Err(Error::InvalidOpcode(opcode)),
-        }
+    /// Moves emulator program counter to next instruction.
+    pub fn increase_program_counter(&mut self) {
+        self.pc += 2;
     }
 }
 
@@ -250,5 +253,155 @@ mod chip_core_tests {
 
         assert!(result.is_err());
         assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_opcode_skip_if_eq_immediate() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x30, 0x01]);
+
+        emulator.v[0] = 1;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 4);
+    }
+
+    #[test]
+    fn tick_opcode_does_not_skip_if_immediate_ne_value() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x35, 0x02]);
+
+        emulator.v[5] = 1;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_opcode_skip_if_ne_immediate() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x40, 0x01]);
+
+        emulator.v[0] = 2;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 4);
+    }
+
+    #[test]
+    fn tick_opcode_does_not_skip_if_immediate_eq_value() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x45, 0x01]);
+
+        emulator.v[5] = 1;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_opcode_skip_if_eq_register() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x52, 0x30]);
+
+        emulator.v[2] = 0x42;
+        emulator.v[3] = 0x42;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 4);
+    }
+
+    #[test]
+    fn tick_opcode_does_not_skip_if_register_ne_value() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x52, 0x30]);
+
+        emulator.v[2] = 0x42;
+        emulator.v[3] = 0x43;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_opcode_skip_if_ne_register() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x92, 0x30]);
+
+        emulator.v[2] = 0x42;
+        emulator.v[3] = 0x43;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 4);
+    }
+
+    #[test]
+    fn tick_opcode_does_not_skip_if_register_eq_value() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x92, 0x30]);
+
+        emulator.v[2] = 0x42;
+        emulator.v[3] = 0x42;
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn tick_opcode_invalid_5xy_last_nibble_fails() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x52, 0x31]);
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_err());
+        assert_eq!(Error::InvalidOpcode(0x5231), result.unwrap_err());
+    }
+
+    #[test]
+    fn tick_opcode_invalid_9xy_last_nibble_fails() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x92, 0x31]);
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_err());
+        assert_eq!(Error::InvalidOpcode(0x9231), result.unwrap_err());
     }
 }
