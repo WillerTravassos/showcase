@@ -1,5 +1,15 @@
 default_job = "clippy-all"
 
+[keybindings]
+backspace = "back"
+g = "scroll-to-top"
+shift-g = "scroll-to-bottom"
+k = "scroll-lines(-1)"
+j = "scroll-lines(1)"
+ctrl-u = "scroll-page(-1)"
+ctrl-d = "scroll-page(1)"
+ctrl-t = "job:test-doc"
+
 [jobs.clippy]
 command = [
   "cargo",
@@ -16,6 +26,7 @@ on_success = "back"
 command = [
   "cargo",
   "clippy",
+  "--all",
   "--all-targets",
   "--all-features",
   "--color",
@@ -25,3 +36,13 @@ command = [
   "warnings"
 ]
 need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--workspace", "--all-targets", "--color", "always"]
+need_stdout = true
+env = { RUST_BACKTRACE = "1" }
+
+[jobs.test-doc]
+command = ["cargo", "test", "--doc", "--workspace", "--color", "always"]
+need_stdout = true
+env = { RUST_BACKTRACE = "1" }

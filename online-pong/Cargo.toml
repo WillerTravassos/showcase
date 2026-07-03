@@ -21,6 +21,7 @@ thiserror = { version = "2.0.18" }
 tracing = { version = "0.1.44" }
 
 [workspace.lints.clippy]
+missing_const_for_fn = "allow"
 module_name_repetitions = "allow"
 # Specific overrides for game dev/performance
 must_use_candidate = "allow"
