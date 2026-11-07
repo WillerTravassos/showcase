@@ -18,9 +18,6 @@ if [[ ! -f $kind_cluster_config_file_path ]]; then
     exit 1
 fi
 
-PATH="$(pwd)/tools/:${PATH}"
-export PATH
-
 echo "=> KIND_VERSION: $(kind version)"
 echo "=> CLUSTER_YAML: ${kind_cluster_config_file_path}"
 echo "---------------Begin Cluster file---------------"

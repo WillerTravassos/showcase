@@ -37,12 +37,39 @@ command = [
 ]
 need_stdout = false
 
+# Unit and hermetic tests. Tilt-backed tests live in the system-tests crate.
 [jobs.test]
-command = ["cargo", "test", "--workspace", "--all-targets", "--color", "always"]
+command = ["cargo", "test", "--workspace", "--exclude", "system-tests", "--all-targets", "--color", "always"]
 need_stdout = true
 env = { RUST_BACKTRACE = "1" }
 
 [jobs.test-doc]
-command = ["cargo", "test", "--doc", "--workspace", "--color", "always"]
+command = ["cargo", "test", "--doc", "--workspace", "--exclude", "system-tests", "--color", "always"]
 need_stdout = true
 env = { RUST_BACKTRACE = "1" }
+
+# Needs Tilt up.
+[jobs.test-integration]
+command = ["cargo", "test", "-p", "system-tests", "--test", "integration_*", "--color", "always"]
+need_stdout = true
+env = { RUST_BACKTRACE = "1" }
+
+# Needs Tilt up.
+[jobs.test-acceptance]
+command = ["cargo", "test", "-p", "system-tests", "--test", "acceptance_*", "--color", "always"]
+need_stdout = true
+env = { RUST_BACKTRACE = "1" }
+
+[jobs.fmt-check]
+command = ["cargo", "+nightly", "fmt", "--check"]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--workspace", "--no-deps", "--all-features", "--color", "always"]
+need_stdout = false
+env = { RUSTDOCFLAGS = "-D warnings" }
+
+[jobs.deny]
+command = ["cargo", "deny", "check"]
+need_stdout = true
+watch = ["Cargo.toml", "Cargo.lock", "deny.toml"]

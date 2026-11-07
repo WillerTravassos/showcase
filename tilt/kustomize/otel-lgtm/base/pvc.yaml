@@ -1,0 +1,10 @@
+# Survives pod restarts and Tilt restarts; deleted with the cluster.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lgtm-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi

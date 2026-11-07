@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "ask": [
+      "Edit(**/test/acceptance/**)",
+      "Edit(**/crates/system-tests/tests/acceptance_*.rs)"
+    ]
+  }
+}

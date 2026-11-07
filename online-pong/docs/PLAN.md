@@ -1,5 +1,9 @@
 # Showcase: CHIP-8 Emulator + Pong Project Plan
 
+> This plan predates the repository standards. Where its layout, tooling, or acceptance
+> criteria differ from `online-pong/AGENTS.md` or `docs/standards/`, those files win.
+> Stories convert to tickets (`docs/workflow/tickets.md`) when work on them starts.
+
 A Rust learning project: build a CHIP-8 emulator, an assembler, a Pong ROM, networked multiplayer, and a multi-game server. Final goal is a portfolio piece that demonstrates idiomatic Rust across the stack — emulator core, parsing, GUI, networking, async server, and Kubernetes-native deployment. Code must be enterprise level.
 
 ## Decisions Locked In
