@@ -1,7 +1,9 @@
 #####################################
 # Target variables
 #####################################
-# Tools come from devbox (`devbox shell`); CI runs these same targets.
+# Tools come from devbox (`devbox install`); CI runs these same targets.
+# Every recipe resolves tools from the devbox profile first, inside `devbox shell` or not.
+export PATH := $(CURDIR)/.devbox/nix/profile/default/bin:$(PATH)
 .DEFAULT_GOAL := help
 
 PROJECT ?= online-pong
