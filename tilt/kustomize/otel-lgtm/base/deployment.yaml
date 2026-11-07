@@ -1,0 +1,54 @@
+# Grafana LGTM in one container (Loki, Grafana, Tempo, Prometheus, plus an OpenTelemetry
+# Collector). Development and testing use only.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lgtm
+  labels:
+    app: lgtm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # one writer for the volume
+  selector:
+    matchLabels:
+      app: lgtm
+  template:
+    metadata:
+      labels:
+        app: lgtm
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: lgtm
+          image: grafana/otel-lgtm
+          ports:
+            - name: grafana
+              containerPort: 3000
+            - name: tempo
+              containerPort: 3200
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: prometheus
+              containerPort: 9090
+          readinessProbe:
+            exec:
+              command: ["cat", "/tmp/ready"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              memory: 3Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: data
+              mountPath: /loki
+              subPath: loki
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: lgtm-data

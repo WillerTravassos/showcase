@@ -1,0 +1,10 @@
+# -*- mode: Python -*-
+# clinic-scheduler local resources, labelled "clinic-scheduler" in the Tilt UI. The root
+# Tiltfile loads this file and enables RESOURCES when clinic-scheduler is the active
+# project.
+#
+# Add workloads from deployments/<service>/overlays/local here as services appear, and
+# list every resource name in RESOURCES. k6 tests load from perf-test-runner.tiltfile in
+# this folder.
+
+RESOURCES = []

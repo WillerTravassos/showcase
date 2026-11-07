@@ -1,10 +1,13 @@
 # --- Repository (.gitignore) --
 /tools
+.devbox/
+tilt_config.json
+# Ticket drafts; tickets are published as GitHub issues
+**/tickets/
 
 # --- Rust (.gitignore) ---
 **/target/
 **/*.rs.bk
-Cargo.lock
 
 # --- Go (.gitignore) ---
 # Binaries for programs and plugins

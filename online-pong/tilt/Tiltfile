@@ -1,0 +1,9 @@
+# -*- mode: Python -*-
+# online-pong local resources, labelled "online-pong" in the Tilt UI. The root Tiltfile
+# loads this file and enables RESOURCES when online-pong is the active project.
+#
+# Add workloads from deployments/<service>/overlays/local here as services appear, and
+# list every resource name in RESOURCES. k6 tests load from perf-test-runner.tiltfile in
+# this folder.
+
+RESOURCES = []

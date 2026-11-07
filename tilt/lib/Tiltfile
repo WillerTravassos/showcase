@@ -1,0 +1,36 @@
+# -*- mode: Python -*-
+# Helpers shared by the root Tiltfile and every project Tiltfile.
+
+load("ext://uibutton", "cmd_button", "location")
+
+SHARED_LABEL = "shared"
+
+
+def kustomize_overlay(path):
+    """Applies a kustomize overlay to the cluster, for example "deployments/booking/overlays/local"."""
+    k8s_yaml(kustomize(path))
+
+
+def project_switch_buttons(projects, active, repo_root):
+    """Adds one navigation button per project that makes it the active project.
+
+    A button writes the project to tilt_config.json and clears any `tilt up` arguments, so
+    Tilt re-executes the Tiltfile with the new project enabled. The file also makes it the
+    default on the next `tilt up`.
+    """
+    for project in projects:
+        text = project + " (active)" if project == active else "Switch to " + project
+        cmd_button(
+            "switch-" + project,
+            argv=[
+                "sh",
+                "-c",
+                'printf \'{"project": "%s"}\\n\' "$1" > "$2/tilt_config.json" && tilt args --clear',
+                "switch",
+                project,
+                repo_root,
+            ],
+            location=location.NAV,
+            text=text,
+            icon_name="swap_horiz",
+        )

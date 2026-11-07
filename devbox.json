@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "gnumake@4.4.1",
+    "gh@2.102.0",
+    "go@1.27.1",
+    "golangci-lint@2.14.0",
+    "go-arch-lint@1.19.0",
+    "go-mockery@3.8.0",
+    "govulncheck@1.8.0",
+    "rustup@1.29.1",
+    "bacon@3.26.0",
+    "cargo-deny@0.20.2",
+    "cargo-mutants@27.1.0",
+    "biome@2.5.15",
+    "esbuild@0.27.2",
+    "k6@2.2.0",
+    "tilt@0.37.7",
+    "kind@0.32.0",
+    "ctlptl@0.9.6",
+    "kubectl@1.37.1",
+    "kustomize@5.8.2",
+    "gitleaks@8.30.1",
+    "trivy@0.74.0"
+  ],
+  "shell": {
+    "init_hook": [
+      "rustup show active-toolchain >/dev/null 2>&1 || rustup default stable",
+      "rustup run nightly rustfmt --version >/dev/null 2>&1 || rustup toolchain install nightly --profile minimal --component rustfmt"
+    ]
+  }
+}
