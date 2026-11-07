@@ -404,4 +404,65 @@ mod chip_core_tests {
         assert!(result.is_err());
         assert_eq!(Error::InvalidOpcode(0x9231), result.unwrap_err());
     }
+
+    #[test]
+    fn tick_opcode_load_immediate_succeeds() {
+        let mut emulator = Chip8::default();
+        let load_result = emulator.load_rom(&[0x66, 0x69]);
+
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+
+        assert!(result.is_ok());
+        assert_eq!(emulator.v[0x6], 0x69);
+    }
+
+    #[test]
+    fn tick_opcode_add_immediate_succeeds() {
+        let mut emulator = Chip8::default();
+
+        emulator.v[0x6] = 0x01;
+
+        let load_result = emulator.load_rom(&[0x76, 0x69]);
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+        assert!(result.is_ok());
+        assert_eq!(emulator.v[0x6], 0x6A);
+    }
+
+    #[test]
+    fn tick_opcode_add_immediate_with_overflow_succeeds() {
+        let mut emulator = Chip8::default();
+
+        emulator.v[0x6] = 0x01;
+
+        let load_result = emulator.load_rom(&[0x76, 0xFF]);
+        assert!(load_result.is_ok());
+
+        let result = emulator.tick();
+        assert!(result.is_ok());
+        assert_eq!(emulator.v[0x6], 0x00);
+    }
+
+    #[test]
+    fn tick_opcode_copy_register_succeeds() {
+        let mut emulator = Chip8::default();
+
+        emulator.v[0x5] = 0x01;
+        emulator.v[0x6] = 0x02;
+        emulator.v[0x7] = 0x03;
+
+        let load_result = emulator.load_rom(&[0x86, 0x70, 0x85, 0x50]);
+        assert!(load_result.is_ok());
+
+        let mut result = emulator.tick();
+        assert!(result.is_ok());
+        assert_eq!(emulator.v[0x6], 0x03);
+
+        result = emulator.tick();
+        assert!(result.is_ok());
+        assert_eq!(emulator.v[0x5], 0x01);
+    }
 }

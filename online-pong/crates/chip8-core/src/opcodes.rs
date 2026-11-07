@@ -43,6 +43,18 @@ impl Chip8 {
                 self.op_skip_if_eq_register(opcode);
                 Ok(())
             }
+            (0x6, _, _, _) => {
+                self.op_put_immediate(opcode);
+                Ok(())
+            }
+            (0x7, _, _, _) => {
+                self.op_add_immediate(opcode);
+                Ok(())
+            }
+            (0x8, _, _, 0x0) => {
+                self.op_copy_register(opcode);
+                Ok(())
+            }
             (0x9, _, _, 0x0) => {
                 self.op_skip_if_ne_register(opcode);
                 Ok(())
@@ -134,8 +146,35 @@ impl Chip8 {
         }
     }
 
-    fn nn_from_opcode(opcode: u16) -> u8 {
-        (opcode & 0x00FF) as u8
+    /// Puts the immediate value into a register. Opcode 6XNN, where X is the index of a CHIP-8 8bit
+    /// register, and NN is the expected value in that register.
+    pub(super) fn op_put_immediate(&mut self, opcode: u16) {
+        let x = Self::x_nibble_from_opcode(opcode);
+        let expected = Self::nn_from_opcode(opcode);
+
+        self.v[x] = expected;
+    }
+
+    /// Add the immediate value in the opcode to a register at index defined by X nibble. Opcode
+    /// 7XNN, where X is the index of a CHIP-8 8bit register, and NN is the value that will be added
+    /// to that register's value.
+    pub(super) fn op_add_immediate(&mut self, opcode: u16) {
+        let x = Self::x_nibble_from_opcode(opcode);
+        let expected = Self::nn_from_opcode(opcode);
+
+        // NOTE: needs to be updated overflowing_add and use the carry with carry over
+        // register v[0xF]
+        let (result, _carry_over) = self.v[x].overflowing_add(expected);
+
+        self.v[x] = result;
+    }
+
+    /// Copies register value at Y index to register at X index. Opcode 8XY0, where X and Y are indexes of registers.
+    pub(super) fn op_copy_register(&mut self, opcode: u16) {
+        let x = Self::x_nibble_from_opcode(opcode);
+        let y = Self::y_nibble_from_opcode(opcode);
+
+        self.v[x] = self.v[y];
     }
 
     fn x_nibble_from_opcode(opcode: u16) -> usize {
@@ -144,6 +183,10 @@ impl Chip8 {
 
     fn y_nibble_from_opcode(opcode: u16) -> usize {
         ((opcode >> 4) & 0x0F) as usize
+    }
+
+    fn nn_from_opcode(opcode: u16) -> u8 {
+        (opcode & 0x00FF) as u8
     }
 
     fn nnn_from_opcode(opcode: u16) -> u16 {
@@ -369,5 +412,72 @@ mod opcode_tests {
         emulator.op_skip_if_ne_register(opcode);
 
         assert_eq!(emulator.pc, START_ADDRESS + 2);
+    }
+
+    #[test]
+    fn op_put_immediate_succeeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x6123;
+
+        emulator.op_put_immediate(opcode);
+
+        assert_eq!(emulator.v[1], 0x23);
+    }
+
+    #[test]
+    fn op_put_immediate_at_max_index_succeeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x6FFF;
+
+        emulator.op_put_immediate(opcode);
+
+        assert_eq!(emulator.v[0xF], 0xFF);
+    }
+
+    #[test]
+    fn op_add_immediate_succeeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x7141;
+
+        emulator.v[0x1] = 0x1;
+        emulator.op_add_immediate(opcode);
+
+        assert_eq!(emulator.v[1], 0x42);
+    }
+
+    #[test]
+    fn op_add_immediate_wrap_boundary_succeeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x71FF;
+
+        emulator.v[0xF] = 0x00;
+        emulator.v[0x1] = 0x01;
+        emulator.op_add_immediate(opcode);
+
+        assert_eq!(emulator.v[0x1], 0x00);
+        assert_eq!(emulator.v[0xF], 0x00);
+    }
+
+    #[test]
+    fn op_copy_register_suceeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x8120;
+
+        emulator.v[0x1] = 0x01;
+        emulator.v[0x2] = 0x05;
+        emulator.op_copy_register(opcode);
+
+        assert_eq!(emulator.v[0x1], 0x05);
+    }
+
+    #[test]
+    fn op_copy_register_same_index_suceeds() {
+        let mut emulator = Chip8::default();
+        let opcode = 0x8110;
+
+        emulator.v[0x1] = 0x10;
+        emulator.op_copy_register(opcode);
+
+        assert_eq!(emulator.v[0x1], 0x10);
     }
 }
