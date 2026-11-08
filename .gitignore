@@ -2,6 +2,8 @@
 /tools
 .devbox/
 tilt_config.json
+.gooze-reports/
+.gooze.log
 # Ticket drafts; tickets are published as GitHub issues
 **/tickets/
 

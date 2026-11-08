@@ -77,8 +77,7 @@ Goal: an empty, verified project that answers over HTTPS on the new cluster.
 ### 0.1 Project builds and verifies
 As a developer, I want the clinic-scheduler module scaffolded, so that every later ticket
 starts from a green `make go-verify`.
-- Rules: one Go module; `internal/telemetry`, `internal/logctx`, `internal/tempotest`,
-  `internal/testdb` exist; `.go-arch-lint.yml` and `.mockery.yml` exist; templ, buf,
+- Rules: one Go module; `internal/telemetry` and `internal/logctx` exist; `.go-arch-lint.yml` and `.mockery.yml` exist; templ, buf,
   sqlc, and Tailwind standalone CLI pinned in devbox.
 - Verify the setup items never run (devbox shell, Gooze `--diff` flag, mockery v3 schema,
   go-arch-lint schema, acceptance path `ask` permission).
@@ -120,6 +119,7 @@ As a patient, I want to see the free times of a clinic on a day, so that I can p
 - `booking` builds its availability projection from `scheduling` events through the
   outbox relay and NATS.
 - The seeder creates staff shifts.
+- Adds `internal/tempotest`, the Tempo trace helper for acceptance tests.
 - Depends on: 1.1. Services: `scheduling`, `booking`, `patient-web`, `seeder`.
   ADRs: 0007, 0008, 0009.
 
