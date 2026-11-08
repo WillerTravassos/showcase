@@ -13,6 +13,13 @@ user or caller can observe. Its scenarios are the specification the agent builds
 
 ## Writing scenarios
 
+Tickets follow example mapping (Matt Wynne): rules, examples that illustrate them, and
+open questions.
+
+- List the story's rules (business rules the behaviour obeys) first. Each scenario
+  illustrates one rule; a rule with no scenario is not specified yet.
+- Record anything unclear under Questions. Scenarios stay in draft while a question is
+  open.
 - Use Given/When/Then in the project's domain language (`GLOSSARY.md`). One to three
   scenarios per ticket; more means the slice is too thick, so split it.
 - Describe what the system does, never how: no endpoints, tables, class names, or UI
@@ -42,10 +49,16 @@ And the patient sees the appointment in their schedule
 ## Story
 As a <role>, I want <capability>, so that <outcome>.
 
+## Rules
+- <Business rule the behaviour obeys>
+
+## Questions
+- <Open question; answer or remove before approval>
+
 ## Scenarios
 Status: draft | approved
 
-### <Scenario name>
+### <Rule>: <Scenario name>
 Given ...
 When ...
 Then ...

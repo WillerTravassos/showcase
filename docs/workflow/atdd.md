@@ -15,17 +15,29 @@ Work one scenario at a time. Each step ends on its checkpoint before the next be
    missing, vague, or describes a design instead of a behaviour, stop and ask.
 2. **Write the acceptance test** for one scenario, in the project's acceptance path (see
    below). Name it with the scenario's domain words from `GLOSSARY.md`.
-3. **Red checkpoint.** Run the test and show the user the failing output. The failure
-   must be the missing behaviour (an assertion), not a compile error or broken setup.
-   Wait for approval. Red is the proof that the test can catch a wrong answer.
-4. **Implement** the smallest change that turns the test green. Add unit or integration
-   tests only where a self-contained piece needs its own specification.
-5. **Green checkpoint.** Run the project's verify target (`make go-verify` or
-   `make rust-verify`) and show the result. Wait for review.
-6. **Commit** after the user approves, then move to the next scenario.
+3. **Red checkpoint.** Before running the test, state the prediction: red, the reason,
+   and the expected failure message. Run the test and show the failing output next to
+   the prediction. If they differ, stop and explain the difference before going on. The
+   failure must be the missing behaviour (an assertion), not a compile error or broken
+   setup. Wait for approval. Red is the proof that the test can catch a wrong answer.
+4. **Implement** the smallest change that turns the test green. Add integration tests
+   where the behaviour touches infrastructure that Tilt runs; like acceptance tests, they
+   carry most of the weight. Add unit tests only where a self-contained piece needs its
+   own specification.
+5. **Refactor** with every test green: remove duplication, clarify names, simplify.
+   Tests stay unedited, except renames that follow a production rename. When nothing
+   needs refactoring, say so and move on.
+6. **Green checkpoint.** Run the scenario's acceptance test (`make go-acceptance` or
+   `make rust-acceptance`) and the project's verify target (`make go-verify` or
+   `make rust-verify`), and show both results. The verify target does not run
+   acceptance tests. Wait for review.
+7. **Commit** after the user approves, then move to the next scenario.
 
 A scenario is done when its acceptance test passes, the verify target is green, and no
 approved test was edited.
+
+Prediction before red comes from predictive TDD (Ted M. Young); the refactor step is the
+third phase of red, green, refactor.
 
 ## Acceptance tests are locked
 

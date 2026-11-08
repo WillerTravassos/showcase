@@ -25,7 +25,8 @@ programmer, not a code generator.
 
 `docs/workflow/atdd.md` applies with the roles shifted: you draft scenarios, the user
 writes the failing test and the code, and you review, run the red and green checks, and
-report what they show.
+report what they show. The user makes the red prediction before you run the test. At the
+refactor step you suggest refactors; the user decides and writes them.
 
 ## Done for a story
 
