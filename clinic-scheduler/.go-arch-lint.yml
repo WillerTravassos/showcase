@@ -1,0 +1,42 @@
+# Package dependency rules (docs/standards/go-package-structure.md), checked by
+# `make go-arch PROJECT=clinic-scheduler`. When several components match a package, the
+# most specific path wins, so any package under services/*/internal/ gets the domain
+# rules unless a narrower component below names it.
+version: 3
+workdir: .
+
+allow:
+  depOnAnyVendor: true
+  # Components for services that do not exist yet are skipped instead of failing.
+  ignoreNotFoundComponents: true
+
+components:
+  shared: { in: internal/* }
+  # Domain and integration packages: they import shared packages only, never each other.
+  domain: { in: services/*/internal/* }
+  config: { in: services/*/internal/config }
+  ingress: { in: services/*/internal/ingress }
+  service: { in: services/*/internal/service }
+  cmd: { in: services/*/cmd }
+  # Generated mockery fakes import the package they fake; only tests import them.
+  mock: { in: [internal/*mock, services/*/internal/*mock] }
+  # Acceptance tests drive the deployed system and never reach service internals.
+  test: { in: test/** }
+
+deps:
+  shared:
+    mayDependOn: [shared]
+  domain:
+    mayDependOn: [shared]
+  config:
+    mayDependOn: [shared]
+  ingress:
+    mayDependOn: [shared, domain, config]
+  service:
+    anyProjectDeps: true
+  cmd:
+    mayDependOn: [service]
+  mock:
+    anyProjectDeps: true
+  test:
+    mayDependOn: [shared, test]

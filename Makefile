@@ -141,7 +141,7 @@ go-vuln: ## Check dependencies and code for known vulnerabilities (govulncheck)
 	@cd $(PROJECT_DIR) && govulncheck ./...
 
 .PHONY: go-verify
-go-verify: go-lint go-arch go-test go-vuln ## Everything a change must pass before review
+go-verify: go-lint go-arch go-test go-vuln secrets-scan ## Everything a change must pass before review
 
 .PHONY: go-tidy
 go-tidy: ## Tidy and verify the Go module

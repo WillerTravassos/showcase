@@ -99,8 +99,10 @@ Prefix a role file by capability when a package has more than one
 - `ingress` imports domain and integration packages and composes them.
 - `service` is the only package that imports everything; it wires and starts the service.
 - `make go-arch PROJECT=<project>` enforces these rules from `.go-arch-lint.yml`
-  ([go-arch-lint](https://github.com/fe3dback/go-arch-lint)). Every new package is added
-  to that file in the same change.
+  ([go-arch-lint](https://github.com/fe3dback/go-arch-lint)). A new package under
+  `services/*/internal/` gets the domain rules by default; one that needs other rules
+  (`ingress`, `service`, `config`) gets a more specific component in that file in the
+  same change.
 
 ## Embedded web assets
 

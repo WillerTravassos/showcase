@@ -1,0 +1,9 @@
+# Fake generation for `make go-mocks PROJECT=clinic-scheduler` (mockery v3). Each mocked
+# package gets a sibling <pkg>mock package; list a package and its interfaces under
+# `packages` to generate its fakes.
+template: testify
+structname: "{{.InterfaceName}}"
+pkgname: "{{.SrcPackageName}}mock"
+dir: "{{.InterfaceDir}}/../{{.SrcPackageName}}mock"
+filename: "{{.InterfaceName | snakecase}}.go"
+packages: {}
