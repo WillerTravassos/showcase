@@ -11,3 +11,6 @@ labels:
 resources:
   - ./deployment.yaml
   - ./service.yaml
+
+components:
+  - ../../../../deployments/components/workload-lifecycle

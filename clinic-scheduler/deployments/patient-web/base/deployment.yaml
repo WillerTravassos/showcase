@@ -29,10 +29,6 @@ spec:
               value: patient-web
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: http/protobuf
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false

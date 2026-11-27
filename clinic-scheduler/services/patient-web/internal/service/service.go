@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 
+	"github.com/WillerTravassos/showcase/clinic-scheduler/internal/lifecycle"
 	"github.com/WillerTravassos/showcase/clinic-scheduler/internal/telemetry"
 	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/internal/config"
 	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/internal/ingress"
@@ -26,11 +27,14 @@ const (
 	readTimeout       = 10 * time.Second
 	writeTimeout      = 30 * time.Second
 	idleTimeout       = 2 * time.Minute
-	shutdownTimeout   = 10 * time.Second
 )
 
-// Run starts telemetry and the HTTP server, and serves until ctx ends; then it drains
-// open requests and flushes telemetry. version becomes service.version.
+// telemetryFlushTimeout bounds the telemetry flush after the drain. The preStop wait,
+// [lifecycle.DrainTimeout], and this flush fit inside the 30 second grace period.
+const telemetryFlushTimeout = 5 * time.Second
+
+// Run starts telemetry, the HTTP server, and the probes, and serves until ctx ends; then
+// it drains open requests and flushes telemetry. version becomes service.version.
 func Run(ctx context.Context, version string) error {
 	tel, err := telemetry.Start(ctx, version)
 	if err != nil {
@@ -39,7 +43,7 @@ func Run(ctx context.Context, version string) error {
 
 	defer func() {
 		// The run context has ended by now; shutdown gets its own deadline.
-		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), telemetryFlushTimeout)
 		defer cancel()
 
 		if shutdownErr := tel.Shutdown(shutdownCtx); shutdownErr != nil {
@@ -52,10 +56,15 @@ func Run(ctx context.Context, version string) error {
 	}()
 
 	if err = serve(ctx, tel.Logger, config.Load(), version); err != nil {
+		message, errorType := "server failed", "startup"
+		if errors.Is(err, lifecycle.ErrShutdown) {
+			message, errorType = "shutdown failed", "shutdown"
+		}
+
 		tel.Logger.ErrorContext(
 			ctx,
-			"server failed",
-			slog.String("error.type", "startup"),
+			message,
+			slog.String("error.type", errorType),
 			slog.String("exception.message", err.Error()),
 		)
 	}
@@ -74,18 +83,21 @@ func serve(ctx context.Context, logger *slog.Logger, cfg config.Config, version 
 		return fmt.Errorf("listen on %s: %w", cfg.Addr, err)
 	}
 
+	probeListener, err := new(net.ListenConfig).Listen(ctx, "tcp", cfg.ProbeAddr)
+	if err != nil {
+		// The probe listen error is the one worth reporting; the other listener is unused.
+		_ = listener.Close()
+
+		return fmt.Errorf("listen on %s: %w", cfg.ProbeAddr, err)
+	}
+
 	server := &http.Server{
 		Handler:           ingress.NewHandler(logger, catalogue, otel.GetTracerProvider()),
 		ReadHeaderTimeout: readHeaderTimeout,
 		ReadTimeout:       readTimeout,
 		WriteTimeout:      writeTimeout,
 		IdleTimeout:       idleTimeout,
-		BaseContext:       func(net.Listener) context.Context { return ctx },
 	}
-
-	served := make(chan error, 1)
-
-	go func() { served <- server.Serve(listener) }()
 
 	logger.InfoContext(
 		ctx,
@@ -94,21 +106,8 @@ func serve(ctx context.Context, logger *slog.Logger, cfg config.Config, version 
 		slog.String(string(attribute.Key("server.address")), cfg.Addr),
 	)
 
-	select {
-	case err = <-served:
-		return fmt.Errorf("serve: %w", err)
-	case <-ctx.Done():
-	}
-
-	shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
-	defer cancel()
-
-	if err = server.Shutdown(shutdownCtx); err != nil {
-		return fmt.Errorf("shut down server: %w", err)
-	}
-
-	if err = <-served; !errors.Is(err, http.ErrServerClosed) {
-		return fmt.Errorf("serve: %w", err)
+	if err = lifecycle.Run(ctx, logger, server, listener, probeListener); err != nil {
+		return fmt.Errorf("run server: %w", err)
 	}
 
 	return nil
