@@ -6,6 +6,8 @@ type HomeView struct {
 	Lang string
 	// PortalName is the portal's name, used as title and heading.
 	PortalName string
+	// LanguageSwitch switches the page to the other language.
+	LanguageSwitch LanguageSwitchView
 }
 
 // Home renders the patient portal home page.
@@ -18,6 +20,9 @@ templ Home(v HomeView) {
 			<title>{ v.PortalName }</title>
 		</head>
 		<body>
+			<header>
+				@LanguageSwitch(v.LanguageSwitch)
+			</header>
 			<main>
 				<h1>{ v.PortalName }</h1>
 			</main>

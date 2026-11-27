@@ -33,10 +33,20 @@ func NewHandler(logger *slog.Logger, catalogue *i18n.Bundle, tracerProvider trac
 	h := &Handler{logger: logger, catalogue: catalogue}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", h.home)
+	mux.HandleFunc("POST /preferences", h.savePreferences)
+
+	// CrossOriginProtection rejects state-changing requests that a browser sends from
+	// another site (CSRF, cross-site request forgery).
+	csrf := http.NewCrossOriginProtection().Handler(routeAttribute(mux))
+
 	// otelhttp reads the route from the request the mux matched, so nothing between them
 	// may copy the request (http.MaxBytesHandler does).
-	traced := otelhttp.NewHandler(securityHeaders(routeAttribute(mux)), "patient-web",
-		otelhttp.WithTracerProvider(tracerProvider), otelhttp.WithSpanNameFormatter(spanName))
+	traced := otelhttp.NewHandler(
+		securityHeaders(csrf),
+		"patient-web",
+		otelhttp.WithTracerProvider(tracerProvider),
+		otelhttp.WithSpanNameFormatter(spanName),
+	)
 
 	return http.MaxBytesHandler(traced, maxBodyBytes)
 }

@@ -1,6 +1,7 @@
 package ingress
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -11,17 +12,13 @@ import (
 	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web"
 )
 
-// home renders the patient portal home page in English.
-//
-// shortcut: the language is always English; ticket #3 picks it from the patient's choice
-// and Accept-Language.
+// home renders the patient portal home page in the patient's language.
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	localizer := i18n.NewLocalizer(h.catalogue, "en")
 
-	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
+	view, err := homeView(h.localizer(r), r.URL.Path)
 	if err == nil {
-		err = web.Home(web.HomeView{Lang: "en", PortalName: name}).Render(ctx, w)
+		err = web.Home(view).Render(ctx, w)
 	}
 
 	if err != nil {
@@ -36,4 +33,25 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
+}
+
+// homeView localizes the home page for the page at path.
+func homeView(localizer *i18n.Localizer, path string) (web.HomeView, error) {
+	name, tag, err := localizer.LocalizeWithTag(&i18n.LocalizeConfig{MessageID: "PortalName"})
+	if err != nil {
+		return web.HomeView{}, fmt.Errorf("localize PortalName: %w", err)
+	}
+
+	label, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "SwitchLanguage"})
+	if err != nil {
+		return web.HomeView{}, fmt.Errorf("localize SwitchLanguage: %w", err)
+	}
+
+	lang := tag.String()
+
+	return web.HomeView{
+		Lang:           lang,
+		PortalName:     name,
+		LanguageSwitch: web.LanguageSwitchView{Lang: otherLanguage(lang), Label: label, Return: path},
+	}, nil
 }
