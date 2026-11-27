@@ -18,7 +18,9 @@ var version = "dev"
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	err := service.Run(ctx, version)
+
 	stop()
+
 	if err != nil {
 		// Errors after telemetry starts are already logged; this covers the ones before.
 		fmt.Fprintln(os.Stderr, "patient-web:", err)

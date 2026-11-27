@@ -37,6 +37,7 @@ func NewHandler(logger *slog.Logger, catalogue *i18n.Bundle, tracerProvider trac
 	// may copy the request (http.MaxBytesHandler does).
 	traced := otelhttp.NewHandler(securityHeaders(routeAttribute(mux)), "patient-web",
 		otelhttp.WithTracerProvider(tracerProvider), otelhttp.WithSpanNameFormatter(spanName))
+
 	return http.MaxBytesHandler(traced, maxBodyBytes)
 }
 
@@ -46,6 +47,7 @@ func spanName(_ string, r *http.Request) string {
 	if route := route(r); route != "" {
 		return r.Method + " " + route
 	}
+
 	return r.Method
 }
 
@@ -54,6 +56,7 @@ func spanName(_ string, r *http.Request) string {
 func routeAttribute(mux *http.ServeMux) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
+
 		if route := route(r); route != "" {
 			trace.SpanFromContext(r.Context()).SetAttributes(semconv.HTTPRoute(route))
 		}

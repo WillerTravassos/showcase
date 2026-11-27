@@ -48,6 +48,7 @@ func (h *Handler) Enabled(ctx context.Context, level slog.Level) bool {
 // Handle adds the context attributes and span IDs to r and passes it on.
 func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 	r.AddAttrs(attrsFrom(ctx)...)
+
 	if sc := trace.SpanContextFromContext(ctx); sc.IsValid() {
 		r.AddAttrs(slog.String("trace_id", sc.TraceID().String()), slog.String("span_id", sc.SpanID().String()))
 	}

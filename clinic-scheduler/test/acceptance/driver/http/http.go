@@ -39,15 +39,27 @@ type Client struct {
 // 127.0.0.1 whatever its host name, as browsers do for *.localhost (ADR 0011), and
 // redirects are returned instead of followed.
 func New(ctx context.Context) (*Client, error) {
-	bundle, err := exec.CommandContext(ctx, "kubectl", "--context", "kind-local",
-		"get", "configmap", "local-ca-bundle", "--namespace", "clinic-scheduler",
-		"--output", `jsonpath={.data.ca\.crt}`).Output()
+	bundle, err := exec.CommandContext(
+		ctx,
+		"kubectl",
+		"--context",
+		"kind-local",
+		"get",
+		"configmap",
+		"local-ca-bundle",
+		"--namespace",
+		"clinic-scheduler",
+		"--output",
+		`jsonpath={.data.ca\.crt}`,
+	).Output()
 	if err != nil {
 		if exit, ok := errors.AsType[*exec.ExitError](err); ok {
 			return nil, fmt.Errorf("read the local trust bundle: %w: %s", err, exit.Stderr)
 		}
+
 		return nil, fmt.Errorf("read the local trust bundle: %w", err)
 	}
+
 	roots := x509.NewCertPool()
 	if !roots.AppendCertsFromPEM(bundle) {
 		return nil, errors.New("read the local trust bundle: no certificate in it")
@@ -61,9 +73,11 @@ func New(ctx context.Context) (*Client, error) {
 			if splitErr != nil {
 				return nil, fmt.Errorf("split %s: %w", addr, splitErr)
 			}
+
 			return dialer.DialContext(ctx, network, net.JoinHostPort("127.0.0.1", port))
 		},
 	}
+
 	return &Client{http: &nethttp.Client{
 		Transport: transport,
 		Timeout:   requestTimeout,
@@ -79,14 +93,17 @@ func (c *Client) Get(ctx context.Context, url string) (*Page, error) {
 	if err != nil {
 		return nil, fmt.Errorf("build request for %s: %w", url, err)
 	}
+
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("get %s: %w", url, err)
 	}
 	defer resp.Body.Close()
+
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", url, err)
 	}
+
 	return &Page{Status: resp.StatusCode, Location: resp.Header.Get("Location"), Document: doc}, nil
 }

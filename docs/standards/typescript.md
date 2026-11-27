@@ -18,6 +18,13 @@ Tailwind CSS), plus k6 scripts (see `k6.md`). Sources, in order of precedence:
   `exactOptionalPropertyTypes`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, and
   `verbatimModuleSyntax`.
 
+## Layout
+
+The code layout rules in `AGENTS.md` apply. `biome.json` sets `lineWidth: 120` (Biome
+defaults to 80). Biome's formatter splits a call that does not fit with one argument per
+line and joins one that fits. It keeps blank lines as written (collapsing runs to one)
+but never adds them, so the reviewer checks statement grouping.
+
 ## Language rules
 
 - `const` by default, `let` when reassigned; `var` never appears.

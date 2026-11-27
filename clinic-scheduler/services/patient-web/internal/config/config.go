@@ -19,5 +19,6 @@ func Load() Config {
 	if addr == "" {
 		addr = defaultAddr
 	}
+
 	return Config{Addr: addr}
 }

@@ -32,6 +32,42 @@ judgment rules below still need a reviewer's eye.
 - Configuration comes from environment variables parsed once at startup into a typed
   struct in `internal/config`.
 
+## Layout
+
+The code layout rules in `AGENTS.md` apply. `golines` (120 columns) and `wsl_v5`
+(whitespace linter) enforce most of them, and `make go-lint-fix PROJECT=<project>`
+applies their fixes. Go adds:
+
+- An error check stays next to the call that returns the error, with no blank line
+  between them (`wsl_v5` check `err`). Likewise, `defer` stays next to the call whose
+  resource it releases.
+
+  ```go
+  listener, err := new(net.ListenConfig).Listen(ctx, "tcp", cfg.Addr)
+  if err != nil {
+      return fmt.Errorf("listen on %s: %w", cfg.Addr, err)
+  }
+
+  shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
+  defer cancel()
+  ```
+
+- Related `var` declarations sit on consecutive lines or in one `var ( ... )` block.
+  `wsl_v5` leaves declarations unchecked (its `decl` check is off so these groups are
+  allowed), so the reviewer checks that an unrelated declaration is set apart.
+- A call split over several lines puts every argument on its own line. `golines` splits
+  lines past 120 columns this way, but it neither flags nor joins a call wrapped by hand
+  under the limit; the reviewer does.
+
+  ```go
+  logger.ErrorContext(
+      ctx,
+      "render home page failed",
+      slog.String("error.type", "render"),
+      slog.String("exception.message", err.Error()),
+  )
+  ```
+
 ## Errors
 
 - Check every error. Discard one with `_` only with a comment saying why it cannot fail

@@ -20,6 +20,14 @@ Package layout follows `rust-package-structure.md`. Logging and tracing follow
   plus `nursery` as warnings; CI turns warnings into errors.
 - An `#[allow(...)]` or `#[expect(...)]` needs the user's agreement and a `reason = "..."`.
 
+## Layout
+
+The code layout rules in `AGENTS.md` apply. `rustfmt` (`max_width = 120`) puts every
+argument and parameter on its own line when a call or signature does not fit, and joins
+one that does. It keeps blank lines as written (collapsing runs to one) but never adds
+or removes them, and clippy has no grouping lint, so the reviewer checks statement
+grouping.
+
 ## Style
 
 - Modules use `foo.rs` plus a `foo/` directory, never `foo/mod.rs`.

@@ -18,10 +18,12 @@ var locales embed.FS
 func Catalogue() (*i18n.Bundle, error) {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
+
 	for _, file := range []string{"locales/active.en.toml", "locales/active.fr.toml"} {
 		if _, err := bundle.LoadMessageFileFS(locales, file); err != nil {
 			return nil, fmt.Errorf("load messages %s: %w", file, err)
 		}
 	}
+
 	return bundle, nil
 }

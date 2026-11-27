@@ -12,6 +12,9 @@
 #   - misspell stays off: it knows US and UK English only, and prose here is Canadian
 #   - ClickHouse and Prometheus specific settings dropped (OTel only); exhaustive uses
 #     "map" because golangci-lint 2.14 (the devbox version) rejects "mapliteral"
+#   - enabled: wsl_v5 (blank lines between statement groups, none inside a group); its
+#     "err" check keeps an error check next to the call it checks, and "decl" is off so
+#     related var declarations can sit together
 # Package dependency rules (domain packages never import each other) live in each
 # project's .go-arch-lint.yml, not here.
 
@@ -117,6 +120,7 @@ linters:
     - wastedassign
     - whitespace
     - wrapcheck
+    - wsl_v5
 
   settings:
     cyclop:
@@ -246,6 +250,12 @@ linters:
 
     usetesting:
       os-temp-dir: true
+
+    wsl_v5:
+      enable:
+        - err
+      disable:
+        - decl
 
   exclusions:
     warn-unused: true

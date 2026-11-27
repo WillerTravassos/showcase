@@ -64,6 +64,20 @@ path and one for each failure path it handles. Coverage is a by-product, never a
 - An approved acceptance test is a contract. If one looks wrong, stop and ask; editing,
   skipping, or deleting it needs the user's approval.
 
+## Code layout
+
+Applies to code in every language. Each language standard says which rules its formatter
+and linter enforce and which are left to the reviewer.
+
+- Statements of the same kind that belong together form a group with no blank line
+  inside it: consecutive declarations, consecutive assignments, consecutive calls.
+- A blank line separates one group from the next, and sets apart any statement that is
+  not part of a group (a block such as `if`, `for`, or `switch`; a `return`).
+- A call or signature that does not fit in 120 columns puts every argument on its own
+  line, the first one included, with a trailing comma where the language allows it and
+  the closing bracket on its own line.
+- A call or signature that fits in 120 columns stays on one line; never wrap it by hand.
+
 ## Comments
 
 Comments describe what the code does, how to use it, or the constraint it obeys (a

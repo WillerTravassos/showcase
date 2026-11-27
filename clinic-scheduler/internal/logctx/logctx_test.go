@@ -24,11 +24,13 @@ func decode(t *testing.T, buf *bytes.Buffer) map[string]any {
 	t.Helper()
 	var record map[string]any
 	require.NoError(t, json.Unmarshal(buf.Bytes(), &record))
+
 	return record
 }
 
 func TestContextAttributesAppearOnEveryRecord(t *testing.T) {
 	t.Parallel()
+
 	logger, buf := newLogger()
 	ctx := logctx.With(t.Context(), slog.String("clinic.clinic.id", "c1"))
 	ctx = logctx.With(ctx, slog.String("clinic.appointment.id", "a1"))
@@ -42,6 +44,7 @@ func TestContextAttributesAppearOnEveryRecord(t *testing.T) {
 
 func TestWithLeavesTheParentContextUnchanged(t *testing.T) {
 	t.Parallel()
+
 	logger, buf := newLogger()
 	parent := logctx.With(t.Context(), slog.String("clinic.clinic.id", "c1"))
 	_ = logctx.With(parent, slog.String("clinic.appointment.id", "a1")) // only the parent is logged
@@ -53,6 +56,7 @@ func TestWithLeavesTheParentContextUnchanged(t *testing.T) {
 
 func TestRecordInsideASpanCarriesItsIDs(t *testing.T) {
 	t.Parallel()
+
 	logger, buf := newLogger()
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID:    trace.TraceID{0x0a, 0x0b},
@@ -70,6 +74,7 @@ func TestRecordInsideASpanCarriesItsIDs(t *testing.T) {
 
 func TestRecordOutsideASpanHasNoSpanIDs(t *testing.T) {
 	t.Parallel()
+
 	logger, buf := newLogger()
 
 	logger.InfoContext(context.Background(), "service started")
@@ -81,6 +86,7 @@ func TestRecordOutsideASpanHasNoSpanIDs(t *testing.T) {
 
 func TestDerivedLoggerKeepsContextAttributes(t *testing.T) {
 	t.Parallel()
+
 	logger, buf := newLogger()
 	ctx := logctx.With(t.Context(), slog.String("clinic.appointment.id", "a1"))
 

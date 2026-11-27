@@ -36,20 +36,30 @@ func Run(ctx context.Context, version string) error {
 	if err != nil {
 		return fmt.Errorf("start telemetry: %w", err)
 	}
+
 	defer func() {
 		// The run context has ended by now; shutdown gets its own deadline.
 		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
 		defer cancel()
+
 		if shutdownErr := tel.Shutdown(shutdownCtx); shutdownErr != nil {
-			tel.Logger.ErrorContext(shutdownCtx, "telemetry shutdown failed",
-				slog.String("exception.message", shutdownErr.Error()))
+			tel.Logger.ErrorContext(
+				shutdownCtx,
+				"telemetry shutdown failed",
+				slog.String("exception.message", shutdownErr.Error()),
+			)
 		}
 	}()
 
 	if err = serve(ctx, tel.Logger, config.Load(), version); err != nil {
-		tel.Logger.ErrorContext(ctx, "server failed",
-			slog.String("error.type", "startup"), slog.String("exception.message", err.Error()))
+		tel.Logger.ErrorContext(
+			ctx,
+			"server failed",
+			slog.String("error.type", "startup"),
+			slog.String("exception.message", err.Error()),
+		)
 	}
+
 	return err
 }
 
@@ -58,10 +68,12 @@ func serve(ctx context.Context, logger *slog.Logger, cfg config.Config, version 
 	if err != nil {
 		return fmt.Errorf("load message catalogue: %w", err)
 	}
+
 	listener, err := new(net.ListenConfig).Listen(ctx, "tcp", cfg.Addr)
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", cfg.Addr, err)
 	}
+
 	server := &http.Server{
 		Handler:           ingress.NewHandler(logger, catalogue, otel.GetTracerProvider()),
 		ReadHeaderTimeout: readHeaderTimeout,
@@ -72,22 +84,32 @@ func serve(ctx context.Context, logger *slog.Logger, cfg config.Config, version 
 	}
 
 	served := make(chan error, 1)
+
 	go func() { served <- server.Serve(listener) }()
-	logger.InfoContext(ctx, "server started", slog.String(string(semconv.ServiceVersionKey), version),
-		slog.String(string(attribute.Key("server.address")), cfg.Addr))
+
+	logger.InfoContext(
+		ctx,
+		"server started",
+		slog.String(string(semconv.ServiceVersionKey), version),
+		slog.String(string(attribute.Key("server.address")), cfg.Addr),
+	)
 
 	select {
 	case err = <-served:
 		return fmt.Errorf("serve: %w", err)
 	case <-ctx.Done():
 	}
+
 	shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
 	defer cancel()
+
 	if err = server.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("shut down server: %w", err)
 	}
+
 	if err = <-served; !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("serve: %w", err)
 	}
+
 	return nil
 }

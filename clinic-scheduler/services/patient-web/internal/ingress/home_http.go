@@ -18,16 +18,22 @@ import (
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	localizer := i18n.NewLocalizer(h.catalogue, "en")
+
 	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
 	if err == nil {
 		err = web.Home(web.HomeView{Lang: "en", PortalName: name}).Render(ctx, w)
 	}
+
 	if err != nil {
 		span := trace.SpanFromContext(ctx)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "render home page")
-		h.logger.ErrorContext(ctx, "render home page failed",
-			slog.String("error.type", "render"), slog.String("exception.message", err.Error()))
+		h.logger.ErrorContext(
+			ctx,
+			"render home page failed",
+			slog.String("error.type", "render"),
+			slog.String("exception.message", err.Error()),
+		)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

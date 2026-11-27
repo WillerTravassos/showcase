@@ -33,13 +33,16 @@ func OpenPatientPortalHome(ctx context.Context) (*HomePage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open the patient portal: %w", err)
 	}
+
 	page, err := client.Get(ctx, patientPortalURL)
 	if err != nil {
 		return nil, fmt.Errorf("open the patient portal: %w", err)
 	}
+
 	if page.Status != nethttp.StatusOK {
 		return nil, fmt.Errorf("open the patient portal: status %d", page.Status)
 	}
+
 	return &HomePage{Heading: strings.TrimSpace(page.Document.Find("h1").First().Text())}, nil
 }
 
@@ -50,13 +53,16 @@ func OpenPatientPortalOverPlainHTTP(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("open the patient portal over plain HTTP: %w", err)
 	}
+
 	page, err := client.Get(ctx, plainHTTPPatientPortalURL)
 	if err != nil {
 		return "", fmt.Errorf("open the patient portal over plain HTTP: %w", err)
 	}
+
 	if page.Status < nethttp.StatusMultipleChoices || page.Status >= nethttp.StatusBadRequest {
 		return "", fmt.Errorf("open the patient portal over plain HTTP: status %d, not a redirect", page.Status)
 	}
+
 	return withoutDefaultPort(page.Location)
 }
 
@@ -67,9 +73,11 @@ func withoutDefaultPort(address string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("parse redirect address %q: %w", address, err)
 	}
+
 	if (u.Scheme == "https" && u.Port() == "443") || (u.Scheme == "http" && u.Port() == "80") {
 		u.Host = u.Hostname()
 	}
+
 	return u.String(), nil
 }
 
@@ -89,6 +97,7 @@ func OpenAnotherSiteFramingPatientPortal(ctx context.Context) (*FramedPortal, er
 	if err != nil {
 		return nil, fmt.Errorf("open a page framing the patient portal: %w", err)
 	}
+
 	switch loadErr {
 	case "":
 		return &FramedPortal{Refused: false}, nil

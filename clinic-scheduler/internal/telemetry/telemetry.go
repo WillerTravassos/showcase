@@ -46,7 +46,8 @@ type Telemetry struct {
 // shortcut: OTEL_EXPORTER_OTLP_PROTOCOL is ignored and every signal uses http/protobuf;
 // add the gRPC exporters when a deployment needs grpc.
 func Start(ctx context.Context, version string) (*Telemetry, error) {
-	res, err := resource.New(ctx,
+	res, err := resource.New(
+		ctx,
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
 		resource.WithAttributes(semconv.ServiceVersion(version)),
@@ -59,30 +60,35 @@ func Start(ctx context.Context, version string) (*Telemetry, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create span exporter: %w", err)
 	}
+
 	metrics, err := otlpmetrichttp.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("create metric exporter: %w", err)
 	}
+
 	logs, err := otlploghttp.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("create log exporter: %w", err)
 	}
 
 	tp := sdktrace.NewTracerProvider(sdktrace.WithResource(res), sdktrace.WithBatcher(spans))
-	mp := sdkmetric.NewMeterProvider(sdkmetric.WithResource(res),
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metrics)))
-	lp := sdklog.NewLoggerProvider(sdklog.WithResource(res),
-		sdklog.WithProcessor(sdklog.NewBatchProcessor(logs)))
+	mp := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metrics)),
+	)
+	lp := sdklog.NewLoggerProvider(sdklog.WithResource(res), sdklog.WithProcessor(sdklog.NewBatchProcessor(logs)))
 
 	otel.SetTracerProvider(tp)
 	otel.SetMeterProvider(mp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{}, propagation.Baggage{}))
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}),
+	)
 
 	handler := slog.NewMultiHandler(
 		slog.NewJSONHandler(os.Stdout, nil),
 		otelslog.NewHandler(scope, otelslog.WithLoggerProvider(lp)),
 	)
+
 	return &Telemetry{
 		Logger:    slog.New(logctx.NewHandler(handler)),
 		shutdowns: []func(context.Context) error{tp.Shutdown, mp.Shutdown, lp.Shutdown},
@@ -93,10 +99,12 @@ func Start(ctx context.Context, version string) (*Telemetry, error) {
 // tries every provider and returns their errors joined. Call it once, before exit.
 func (t *Telemetry) Shutdown(ctx context.Context) error {
 	var errs []error
+
 	for _, shutdown := range t.shutdowns {
 		if err := shutdown(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("shut down telemetry: %w", err))
 		}
 	}
+
 	return errors.Join(errs...)
 }

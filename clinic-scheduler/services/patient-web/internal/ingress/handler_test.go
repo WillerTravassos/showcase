@@ -19,18 +19,23 @@ import (
 
 func newHandler(t *testing.T) (http.Handler, *tracetest.SpanRecorder) {
 	t.Helper()
+
 	catalogue, err := web.Catalogue()
 	require.NoError(t, err)
+
 	spans := tracetest.NewSpanRecorder()
 	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(spans))
 	logger := slog.New(slog.DiscardHandler)
+
 	return ingress.NewHandler(logger, catalogue, provider), spans
 }
 
 func get(t *testing.T, handler http.Handler, target string) *http.Response {
 	t.Helper()
+
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil))
+
 	return rec.Result()
 }
 
@@ -40,6 +45,7 @@ func TestHomeShowsThePortalNameInEnglish(t *testing.T) {
 
 	resp := get(t, handler, "/")
 	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 
 	require.NoError(t, err)

@@ -19,27 +19,32 @@ import (
 // returned channel and accepts metric and log exports without reading them.
 func newCollector(t *testing.T) (string, <-chan *coltracepb.ExportTraceServiceRequest) {
 	t.Helper()
+
 	exports := make(chan *coltracepb.ExportTraceServiceRequest, 1)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/v1/traces" {
 			return
 		}
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		export := &coltracepb.ExportTraceServiceRequest{}
 		if err = proto.Unmarshal(body, export); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		select {
 		case exports <- export:
 		default: // only the first export is asserted
 		}
 	}))
 	t.Cleanup(srv.Close)
+
 	return srv.URL, exports
 }
 
@@ -62,12 +67,15 @@ func TestStartExportsSpansWithTheServiceResource(t *testing.T) {
 	default:
 		require.FailNow(t, "no span export reached the collector before Shutdown returned")
 	}
+
 	require.Len(t, export.GetResourceSpans(), 1)
 	resourceSpans := export.GetResourceSpans()[0]
+
 	attrs := map[string]string{}
 	for _, kv := range resourceSpans.GetResource().GetAttributes() {
 		attrs[kv.GetKey()] = kv.GetValue().GetStringValue()
 	}
+
 	assert.Equal(t, "booking", attrs["service.name"])
 	assert.Equal(t, "1.2.3", attrs["service.version"])
 	assert.Equal(t, "test", attrs["deployment.environment.name"])

@@ -22,11 +22,13 @@ var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 func TestDomainPackageMayNotImportAnotherDomainPackage(t *testing.T) {
 	t.Parallel()
 	project := t.TempDir()
+
 	for _, name := range []string{"go.mod", "go.sum", ".go-arch-lint.yml"} {
 		content, err := os.ReadFile(filepath.Join(projectRoot, name))
 		require.NoError(t, err)
 		writeFile(t, filepath.Join(project, name), string(content))
 	}
+
 	writeFile(t, filepath.Join(project, "services/fixture/internal/patient/patient.go"), `package patient
 
 func Name() string { return "" }
