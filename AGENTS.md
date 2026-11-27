@@ -34,6 +34,7 @@ Load the matching standard before writing or reviewing code in that language:
 - **TypeScript**: `docs/standards/typescript.md`.
 - **k6 tests**: `docs/standards/k6.md`.
 - **Logs, traces, metrics**: `docs/standards/observability.md`.
+- **Services and their manifests** (shutdown, probes): `docs/standards/kubernetes.md`.
 - **Security**: `docs/standards/security.md` applies to all code. Run the threat model in
   `docs/workflow/threat-model.md` whenever a change touches a trust boundary.
 

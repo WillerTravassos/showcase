@@ -1,0 +1,49 @@
+# Kubernetes pod lifecycle for every service Deployment (docs/standards/kubernetes.md):
+# liveness and readiness probes on the `probe` port, a preStop wait so the gateway stops
+# routing to a stopping pod before the app drains, and the grace period that bounds it.
+#
+# Patches the first container of every Deployment in the kustomization that lists this
+# component. That container must already declare `ports` and `env`. The app serves
+# /livez and /readyz on PROBE_ADDR.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/terminationGracePeriodSeconds
+        value: 30
+      - op: add
+        path: /spec/template/spec/containers/0/ports/-
+        value:
+          name: probe
+          containerPort: 8081
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PROBE_ADDR
+          value: ":8081"
+      - op: add
+        path: /spec/template/spec/containers/0/lifecycle
+        value:
+          preStop:
+            sleep:
+              seconds: 5
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          httpGet:
+            path: /livez
+            port: probe
+          periodSeconds: 10
+          failureThreshold: 3
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          httpGet:
+            path: /readyz
+            port: probe
+          periodSeconds: 2
+          failureThreshold: 1
