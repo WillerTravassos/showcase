@@ -1,0 +1,37 @@
+package components
+
+import "strconv"
+
+// ThemeSwitchView is the view model of the theme switch, already localized.
+type ThemeSwitchView struct {
+	// Legend names the switch, for example "Theme".
+	Legend string
+	// Options are the themes the patient can pick, in the order shown.
+	Options []ThemeOption
+	// Return is the path of the current page, where the patient lands after switching.
+	Return string
+}
+
+// ThemeOption is one theme the patient can pick.
+type ThemeOption struct {
+	// Value is the theme preference posted: "light", "dark", or "system".
+	Value string
+	// Label names the theme, for example "Dark".
+	Label string
+	// Current is true for the theme the page uses now.
+	Current bool
+}
+
+// ThemeSwitch renders a form that switches the portal's colour theme. The current theme's
+// button is marked pressed for assistive technology.
+templ ThemeSwitch(v ThemeSwitchView) {
+	<form method="post" action="/preferences">
+		<fieldset>
+			<legend>{ v.Legend }</legend>
+			<input type="hidden" name="return" value={ v.Return }/>
+			for _, option := range v.Options {
+				<button type="submit" name="theme" value={ option.Value } aria-pressed={ strconv.FormatBool(option.Current) }>{ option.Label }</button>
+			}
+		</fieldset>
+	</form>
+}

@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 )
@@ -85,39 +84,17 @@ func FrameLoadError(ctx context.Context, url string) (string, error) {
 // background colour of the page body as the browser reports it, for example
 // "rgb(15, 23, 42)".
 func Background(ctx context.Context, url, colorScheme string) (string, error) {
-	tabCtx, closeTab := newTab(ctx)
-	defer closeTab()
-
-	_, err := chromedp.Call(tabCtx, emulation.SetEmulatedMedia, emulation.SetEmulatedMediaParams{
-		Features: []*emulation.MediaFeature{{Name: "prefers-color-scheme", Value: colorScheme}},
-	})
+	session, err := NewSession(ctx, colorScheme)
 	if err != nil {
-		return "", fmt.Errorf("prefer the %s colour scheme: %w", colorScheme, err)
+		return "", err
+	}
+	defer session.Close()
+
+	if err = session.Open(url); err != nil {
+		return "", err
 	}
 
-	_, err = chromedp.Call(tabCtx, emulation.SetScriptExecutionDisabled, emulation.SetScriptExecutionDisabledParams{
-		Value: true,
-	})
-	if err != nil {
-		return "", fmt.Errorf("disable scripts: %w", err)
-	}
-
-	if err = chromedp.Do(tabCtx, chromedp.Navigate(url)); err != nil {
-		return "", fmt.Errorf("open %s: %w", url, err)
-	}
-
-	styles, err := chromedp.Run(tabCtx, chromedp.ComputedStyle(chromedp.CSS("body")))
-	if err != nil {
-		return "", fmt.Errorf("read the body style of %s: %w", url, err)
-	}
-
-	for _, style := range styles {
-		if style.Name == "background-color" {
-			return style.Value, nil
-		}
-	}
-
-	return "", fmt.Errorf("%s: the body has no computed background-color", url)
+	return session.Background()
 }
 
 // newTab starts a headless browser with a fresh profile and returns a tab in it, bounded

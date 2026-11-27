@@ -1,3 +1,7 @@
 PortalName = "Patient portal"
 SwitchLanguage = "Français"
 Version = "Version {{.Version}}"
+ThemeLegend = "Theme"
+ThemeLight = "Light"
+ThemeDark = "Dark"
+ThemeSystem = "Match device"
