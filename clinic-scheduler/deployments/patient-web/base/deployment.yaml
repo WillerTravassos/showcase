@@ -1,0 +1,47 @@
+# patient-web: the patient portal BFF (backend for frontend), reached only through the
+# Cilium gateway.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-web
+  namespace: clinic-scheduler
+spec:
+  replicas: 1
+  template:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532 # distroless nonroot
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: patient-web
+          image: patient-web:dev # Tilt and release overlays replace the tag
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: HTTP_ADDR
+              value: ":8080"
+            - name: OTEL_SERVICE_NAME
+              value: patient-web
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: http/protobuf
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

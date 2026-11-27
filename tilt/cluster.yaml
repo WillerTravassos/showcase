@@ -9,3 +9,21 @@ product: kind
 registry: internal-registry
 kindV1Alpha4Cluster:
   name: local
+  # Cilium replaces kindnet and kube-proxy (clinic-scheduler ADR 0011); nodes stay
+  # NotReady until Tilt installs it.
+  networking:
+    disableDefaultCNI: true
+    kubeProxyMode: none
+  nodes:
+    - role: control-plane
+      # The Cilium gateway listens on the node's host network; only this machine can
+      # reach it.
+      extraPortMappings:
+        - containerPort: 80
+          hostPort: 80
+          listenAddress: 127.0.0.1
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          listenAddress: 127.0.0.1
+          protocol: TCP

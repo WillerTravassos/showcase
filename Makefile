@@ -58,7 +58,8 @@ cluster-reset: ## Delete and recreate the local kind cluster
 
 .PHONY: tilt-up
 tilt-up: cluster-create ## Start Tilt (PROJECT=<name> picks the active project)
-	@tilt up $(_TILT_ARGS)
+	@trap 'trap - INT EXIT; $(MAKE) tilt-down' INT EXIT; \
+	tilt up $(_TILT_ARGS)
 
 .PHONY: tilt-down
 tilt-down: ## Stop Tilt and delete its resources
@@ -90,7 +91,9 @@ secrets-scan: ## Scan git history for committed secrets (gitleaks)
 
 .PHONY: trivy
 trivy: ## Scan the project and shared infra for misconfiguration (trivy)
-	@trivy config --exit-code 1 $(PROJECT_DIR) $(CURDIR)/tilt/kustomize
+	@rc=0; for dir in $(PROJECT_DIR) $(CURDIR)/deployments $(CURDIR)/tilt/kustomize; do \
+		trivy config --exit-code 1 --skip-dirs '**/charts' $$dir || rc=1; \
+	done; exit $$rc
 
 .PHONY: trivy-image
 trivy-image: ## Scan a container image for vulnerabilities (IMAGE=<ref>)

@@ -253,6 +253,11 @@ linters:
       - std-error-handling
       - common-false-positives
     rules:
+      # templ writes "// templ: version: ..." right above the package clause of every
+      # generated file, which godoclint reads as a second package comment.
+      - path: '/web/'
+        text: 'package has more than one godoc'
+        linters: [ godoclint ]
       - source: 'TODO'
         linters: [ godot ]
       - path: '_test\.go'

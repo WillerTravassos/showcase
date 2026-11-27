@@ -7,4 +7,40 @@
 # list every resource name in RESOURCES. k6 tests load from perf-test-runner.tiltfile in
 # this folder.
 
-RESOURCES = []
+load("../../tilt/lib/Tiltfile", "kustomize_overlay")
+
+LABEL = "clinic-scheduler"
+PROJECT_DIR = os.path.join(config.main_dir, "clinic-scheduler")
+
+docker_build(
+    "patient-web",
+    PROJECT_DIR,
+    dockerfile=os.path.join(PROJECT_DIR, "services/patient-web/Dockerfile"),
+    only=["go.mod", "go.sum", "internal", "services/patient-web"],
+    build_args={"VERSION": str(local("git describe --always --dirty", quiet=True)).strip()},
+)
+kustomize_overlay(os.path.join(PROJECT_DIR, "deployments/patient-web/overlays/local"))
+kustomize_overlay(os.path.join(PROJECT_DIR, "deployments/cilium-gateway/overlays/local"))
+
+k8s_resource("patient-web", labels=[LABEL])
+k8s_resource(
+    new_name="cilium-gateway",
+    objects=[
+        "clinic-scheduler:gateway",
+        "patient-localhost-tls:certificate",
+        "patient-web:httproute",
+        "patient-web-https-redirect:httproute",
+    ],
+    resource_deps=["cilium-operator", "local-ca"],
+    labels=[LABEL],
+)
+
+# Healthy pods do not mean Cilium has programmed Envoy; acceptance tests need both.
+local_resource(
+    "cilium-gateway-programmed",
+    cmd="kubectl --namespace clinic-scheduler wait gateway/clinic-scheduler --for=condition=Programmed --timeout=120s",
+    resource_deps=["cilium-gateway"],
+    labels=[LABEL],
+)
+
+RESOURCES = ["patient-web", "cilium-gateway", "cilium-gateway-programmed"]

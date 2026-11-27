@@ -270,13 +270,13 @@ When a ticket closes a criterion, add the ticket number to its row.
 | T05 | Technologie | Technologie | Veiller à ce que le PST dispose de mécanismes de gestion des exceptions et d'alertes (seuils de performances, capacités ….). | story | 7.4 |  |
 | T06 | Technologie | Technologie | Il faut démontrer ou confirmer que la base de données est extensible et hautement performante. | story | 11.6 |  |
 | T07 | Technologie | Technologie | Il faut démontrer que le PST est en mesure de cloisonner logiquement ou physiquement toutes les données clinico-administratives (identification des… | story | 11.2 |  |
-| T08 | Technologie | Technologie | Lorsqu'il s"agit d'une application Web, il faut démontrer que le PST est une application Web qui utilise un fureteur au moyen du HTTPS dont la mise à… | story | 0.2 |  |
+| T08 | Technologie | Technologie | Lorsqu'il s"agit d'une application Web, il faut démontrer que le PST est une application Web qui utilise un fureteur au moyen du HTTPS dont la mise à… | story | 0.2 | Ticket 002 |
 | T09 | Technologie | Technologie | Lorsque votre PST est de type client serveur, il faut être en mesure de le déployer au moyen d'un serveur de présentation Citrix, Terminal Service ou… | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |
 | T10 | Technologie | Technologie | Il faut démontrer que le PST peut fonctionner adéquatement dans une infrastructure virtualisée et infonuagique de préférence en mode SaaS. | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |
 | T11 | Technologie | Technologie | Votre PST s'appuie sur ou est compatible avec un système d'exploitation, un système de gestion de base de données et des composantes récents et en… | story | 0.1 |  |
 | T12 | Technologie | Technologie | lorsqu,il y a un arrimage avec les actifs informationnels d'intérêt communs, il faut démontrer que le PST actif utilise l'infrastructure de sécurité… | story | 11.3 |  |
-| T13 | Technologie | Technologie | Pour les applications Web, veiller à ce que le PST soit accessible à distance depuis une interface Web. | story | 0.2 |  |
-| T14 | Technologie | Technologie | Lorsque votre PST est accessible en mode Web, l'application ne nécessite aucune installation de composante. | story | 0.2 |  |
+| T13 | Technologie | Technologie | Pour les applications Web, veiller à ce que le PST soit accessible à distance depuis une interface Web. | story | 0.2 | Ticket 002 |
+| T14 | Technologie | Technologie | Lorsque votre PST est accessible en mode Web, l'application ne nécessite aucune installation de composante. | story | 0.2 | Ticket 002 |
 | T15 | Technologie | Technologie | Le PST peut invoquer la librairie cryptographique du poste de travail Windows (ou de la session Citrix/TS) afin d’effectuer les opérations de… | n/a |  | Web application; patients enter their own information |
 | T16 | Technologie | Technologie | Privilégier le mode SaaS comme solution. | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |
 | T17 | Technologie | Technologie | Hébergement du PST dans les espaces de Santé Québec ou dans un espace infonuagique approuvé par le MCN. | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |

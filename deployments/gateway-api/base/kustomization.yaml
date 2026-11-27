@@ -1,0 +1,8 @@
+# Gateway API CRDs, standard channel (TLSRoute included, which Cilium needs). Pinned to the
+# version Cilium's go.mod uses; Cilium only turns its gateway controller on when these
+# exist before cilium-operator starts.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.3/standard-install.yaml
