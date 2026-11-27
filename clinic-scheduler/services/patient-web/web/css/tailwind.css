@@ -1,8 +1,8 @@
 /* Patient portal styles: the ADR 0013 theme tokens as Tailwind v4 theme variables.
-   `go generate` builds static/app.css from this file. */
+   `go generate` in web/ builds static/app.css from this file. */
 @import "tailwindcss";
 
-@source "./*.templ";
+@source "../**/*.templ";
 
 @theme {
   --color-bg: #ffffff;

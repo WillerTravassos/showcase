@@ -1,23 +1,24 @@
-package web
+package components
 
-// HomeView is the view model of the patient portal home page, already localized.
-type HomeView struct {
+// LayoutView is the view model of the page layout, already localized.
+type LayoutView struct {
 	// Lang is the BCP 47 language tag of the page, for example "en".
 	Lang string
-	// PortalName is the portal's name, used as title and heading.
-	PortalName string
+	// Title is the page title the browser shows.
+	Title string
 	// LanguageSwitch switches the page to the other language.
 	LanguageSwitch LanguageSwitchView
 }
 
-// Home renders the patient portal home page.
-templ Home(v HomeView) {
+// Layout renders the document every patient portal page shares (head, stylesheet,
+// header with the language switch) around the page's main content.
+templ Layout(v LayoutView) {
 	<!DOCTYPE html>
 	<html lang={ v.Lang }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>{ v.PortalName }</title>
+			<title>{ v.Title }</title>
 			<link rel="stylesheet" href="/static/app.css"/>
 		</head>
 		<body class="bg-bg text-text">
@@ -25,7 +26,7 @@ templ Home(v HomeView) {
 				@LanguageSwitch(v.LanguageSwitch)
 			</header>
 			<main>
-				<h1>{ v.PortalName }</h1>
+				{ children... }
 			</main>
 		</body>
 	</html>

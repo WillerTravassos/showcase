@@ -110,6 +110,9 @@ Prefix a role file by capability when a package has more than one
 (`web/web.go`, package `web`, exporting an `fs.FS`). `ingress` imports `web` to serve it.
 TypeScript sources compile into `web/static/` (see `typescript.md`).
 
+A project may split its templates out of `web/` into subpackages; its ADRs say how (for
+example, `clinic-scheduler` ADR 0002: `web/pages` and `web/components`).
+
 ## Deviations from the community layout
 
 - `internal/<package>/` is flat. The layout's `internal/app/` and `internal/pkg/` levels

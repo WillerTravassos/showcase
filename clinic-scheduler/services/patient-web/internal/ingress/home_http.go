@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web"
+	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web/pages"
 )
 
 // home renders the patient portal home page in the patient's language.
@@ -18,7 +18,7 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 
 	view, err := homeView(h.localizer(r), r.URL.Path)
 	if err == nil {
-		err = web.Home(view).Render(ctx, w)
+		err = pages.Home(view).Render(ctx, w)
 	}
 
 	if err != nil {
@@ -36,22 +36,16 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 }
 
 // homeView localizes the home page for the page at path.
-func homeView(localizer *i18n.Localizer, path string) (web.HomeView, error) {
-	name, tag, err := localizer.LocalizeWithTag(&i18n.LocalizeConfig{MessageID: "PortalName"})
+func homeView(localizer *i18n.Localizer, path string) (pages.HomeView, error) {
+	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
 	if err != nil {
-		return web.HomeView{}, fmt.Errorf("localize PortalName: %w", err)
+		return pages.HomeView{}, fmt.Errorf("localize PortalName: %w", err)
 	}
 
-	label, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "SwitchLanguage"})
+	layout, err := layoutView(localizer, path, name)
 	if err != nil {
-		return web.HomeView{}, fmt.Errorf("localize SwitchLanguage: %w", err)
+		return pages.HomeView{}, err
 	}
 
-	lang := tag.String()
-
-	return web.HomeView{
-		Lang:           lang,
-		PortalName:     name,
-		LanguageSwitch: web.LanguageSwitchView{Lang: otherLanguage(lang), Label: label, Return: path},
-	}, nil
+	return pages.HomeView{Layout: layout, PortalName: name}, nil
 }

@@ -1,5 +1,5 @@
-// Package web holds the patient portal's templ components, their view models, and the
-// message catalogue (ADR 0002, ADR 0018).
+// Package web holds the patient portal's embedded static files and its message catalogue
+// (ADR 0002, ADR 0018). Pages and components live in its pages and components packages.
 package web
 
 import (
@@ -12,7 +12,7 @@ import (
 )
 
 //go:generate templ generate
-//go:generate tailwindcss --input tailwind.css --output static/app.css --minify
+//go:generate tailwindcss --input css/tailwind.css --output static/app.css --minify
 
 //go:embed locales/*.toml
 var locales embed.FS

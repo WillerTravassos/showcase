@@ -15,8 +15,10 @@ components:
   # Domain and integration packages: they import shared packages only, never each other.
   domain: { in: services/*/internal/* }
   config: { in: services/*/internal/config }
-  # templ components, view models, and embedded assets (ADR 0002).
+  # Embedded assets and the message catalogue; full pages; shared components (ADR 0002).
   web: { in: services/*/web }
+  web-pages: { in: services/*/web/pages }
+  web-components: { in: services/*/web/components }
   ingress: { in: services/*/internal/ingress }
   service: { in: services/*/internal/service }
   cmd: { in: services/*/cmd }
@@ -34,8 +36,12 @@ deps:
     mayDependOn: [shared]
   web:
     mayDependOn: [shared]
+  web-pages:
+    mayDependOn: [shared, web-components]
+  web-components:
+    mayDependOn: [shared]
   ingress:
-    mayDependOn: [shared, domain, config, web]
+    mayDependOn: [shared, domain, config, web, web-pages, web-components]
   service:
     anyProjectDeps: true
   cmd:
