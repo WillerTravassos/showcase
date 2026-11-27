@@ -22,7 +22,14 @@ docker_build(
 kustomize_overlay(os.path.join(PROJECT_DIR, "deployments/patient-web/overlays/local"))
 kustomize_overlay(os.path.join(PROJECT_DIR, "deployments/cilium-gateway/overlays/local"))
 
-k8s_resource("patient-web", labels=[LABEL])
+# Pods need the CNI (Cilium); spans and logs go to lgtm.
+k8s_resource("patient-web", 
+    resource_deps=["cilium", "lgtm"],
+    port_forwards=[
+        "8080:8080"        
+    ],
+    labels=[LABEL],
+)
 k8s_resource(
     new_name="cilium-gateway",
     objects=[
@@ -31,7 +38,7 @@ k8s_resource(
         "patient-web:httproute",
         "patient-web-https-redirect:httproute",
     ],
-    resource_deps=["cilium-operator", "local-ca"],
+    resource_deps=["cilium-operator", "cilium-envoy", "local-ca", "patient-web"],
     labels=[LABEL],
 )
 

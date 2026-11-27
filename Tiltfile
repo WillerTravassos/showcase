@@ -50,6 +50,7 @@ k8s_resource(
 )
 k8s_resource(
     "lgtm",
+    resource_deps=["cilium"],
     objects=["lgtm-data:persistentvolumeclaim"],
     port_forwards=[
         port_forward(3000, 3000, name="grafana"),
@@ -98,7 +99,7 @@ for name in ["cert-manager", "cert-manager-cainjector", "cert-manager-webhook"]:
 wait_for_webhook(
     "cert-manager-webhook-ready",
     "./tilt/kustomize/local-ca/base/bootstrap-cluster-issuer.yaml",
-    ["cert-manager-webhook"],
+    ["cert-manager-webhook", "cert-manager-cainjector"],
 )
 k8s_resource(
     "trust-manager",
