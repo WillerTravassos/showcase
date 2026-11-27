@@ -107,3 +107,14 @@ func TestHomeRecordsAServerSpanWithItsRoute(t *testing.T) {
 	require.True(t, found, "the span should carry http.route")
 	assert.Equal(t, "/", route.AsString())
 }
+
+func TestStylesheetIsServed(t *testing.T) {
+	t.Parallel()
+	handler, _ := newHandler(t)
+
+	resp := get(t, handler, "/static/app.css")
+	require.NoError(t, resp.Body.Close())
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Contains(t, resp.Header.Get("Content-Type"), "text/css")
+}

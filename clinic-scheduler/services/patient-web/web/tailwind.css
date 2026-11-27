@@ -1,0 +1,46 @@
+/* Patient portal styles: the ADR 0013 theme tokens as Tailwind v4 theme variables.
+   `go generate` builds static/app.css from this file. */
+@import "tailwindcss";
+
+@source "./*.templ";
+
+@theme {
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text: #0f172a;
+  --color-muted: #475569;
+  --color-primary: #4f46e5;
+  --color-on-primary: #ffffff;
+  --color-accent: #be123c;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #ffe4e6;
+  --color-available: #eef2ff;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+  --color-border: #64748b;
+}
+
+:root {
+  /* Form controls and scrollbars follow the theme too. */
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-text: #f1f5f9;
+    --color-muted: #94a3b8;
+    --color-primary: #a5b4fc;
+    --color-on-primary: #1e1b4b;
+    --color-accent: #fda4af;
+    --color-on-accent: #4c0519;
+    --color-accent-soft: #4c0519;
+    --color-available: #1e1b4b;
+    --color-success: #86efac;
+    --color-warning: #fcd34d;
+    --color-danger: #fca5a5;
+    --color-border: #64748b;
+  }
+}

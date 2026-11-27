@@ -10,6 +10,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web"
 )
 
 // maxBodyBytes bounds every request body; the portal has no uploads.
@@ -34,6 +36,7 @@ func NewHandler(logger *slog.Logger, catalogue *i18n.Bundle, tracerProvider trac
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", h.home)
 	mux.HandleFunc("POST /preferences", h.savePreferences)
+	mux.Handle("GET /static/", http.FileServerFS(web.Static))
 
 	// CrossOriginProtection rejects state-changing requests that a browser sends from
 	// another site (CSRF, cross-site request forgery).

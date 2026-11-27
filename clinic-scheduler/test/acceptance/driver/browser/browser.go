@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 )
@@ -33,18 +34,8 @@ func FrameLoadError(ctx context.Context, url string) (string, error) {
 	}))
 	defer otherSite.Close()
 
-	// Certificate trust is checked by the HTTP driver; here it would only hide the framing
-	// behaviour behind a certificate error.
-	opts := append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("ignore-certificate-errors", true))
-
-	allocCtx, cancelAlloc := chromedp.NewExecAllocator(ctx, opts...)
-	defer cancelAlloc()
-
-	tabCtx, cancelTab := chromedp.NewContext(allocCtx)
-	defer cancelTab()
-
-	tabCtx, cancelTimeout := context.WithTimeout(tabCtx, pageTimeout)
-	defer cancelTimeout()
+	tabCtx, closeTab := newTab(ctx)
+	defer closeTab()
 
 	var (
 		mu       sync.Mutex
@@ -87,4 +78,61 @@ func FrameLoadError(ctx context.Context, url string) (string, error) {
 	}
 
 	return loadErr, nil
+}
+
+// Background opens url in a new browser, with no cookies, on a device that prefers the
+// colorScheme ("light" or "dark") and with scripts disabled. It returns the computed
+// background colour of the page body as the browser reports it, for example
+// "rgb(15, 23, 42)".
+func Background(ctx context.Context, url, colorScheme string) (string, error) {
+	tabCtx, closeTab := newTab(ctx)
+	defer closeTab()
+
+	_, err := chromedp.Call(tabCtx, emulation.SetEmulatedMedia, emulation.SetEmulatedMediaParams{
+		Features: []*emulation.MediaFeature{{Name: "prefers-color-scheme", Value: colorScheme}},
+	})
+	if err != nil {
+		return "", fmt.Errorf("prefer the %s colour scheme: %w", colorScheme, err)
+	}
+
+	_, err = chromedp.Call(tabCtx, emulation.SetScriptExecutionDisabled, emulation.SetScriptExecutionDisabledParams{
+		Value: true,
+	})
+	if err != nil {
+		return "", fmt.Errorf("disable scripts: %w", err)
+	}
+
+	if err = chromedp.Do(tabCtx, chromedp.Navigate(url)); err != nil {
+		return "", fmt.Errorf("open %s: %w", url, err)
+	}
+
+	styles, err := chromedp.Run(tabCtx, chromedp.ComputedStyle(chromedp.CSS("body")))
+	if err != nil {
+		return "", fmt.Errorf("read the body style of %s: %w", url, err)
+	}
+
+	for _, style := range styles {
+		if style.Name == "background-color" {
+			return style.Value, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s: the body has no computed background-color", url)
+}
+
+// newTab starts a headless browser with a fresh profile and returns a tab in it, bounded
+// by pageTimeout. The returned function closes the tab and the browser.
+func newTab(ctx context.Context) (context.Context, context.CancelFunc) {
+	// Certificate trust is checked by the HTTP driver; here it would only hide the
+	// behaviour under test behind a certificate error.
+	opts := append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("ignore-certificate-errors", true))
+	allocCtx, cancelAlloc := chromedp.NewExecAllocator(ctx, opts...)
+	tabCtx, cancelTab := chromedp.NewContext(allocCtx)
+	tabCtx, cancelTimeout := context.WithTimeout(tabCtx, pageTimeout)
+
+	return tabCtx, func() {
+		cancelTimeout()
+		cancelTab()
+		cancelAlloc()
+	}
 }

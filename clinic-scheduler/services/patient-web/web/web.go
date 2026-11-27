@@ -11,8 +11,17 @@ import (
 	"golang.org/x/text/language"
 )
 
+//go:generate templ generate
+//go:generate tailwindcss --input tailwind.css --output static/app.css --minify
+
 //go:embed locales/*.toml
 var locales embed.FS
+
+// Static holds the files served under /static/, at their path in this package
+// ("static/app.css").
+//
+//go:embed static
+var Static embed.FS
 
 // Catalogue loads the English and French messages. English is the default language.
 func Catalogue() (*i18n.Bundle, error) {
