@@ -7,8 +7,11 @@ SHARED_LABEL = "shared"
 
 
 def kustomize_overlay(path):
-    """Applies a kustomize overlay to the cluster, for example "deployments/booking/overlays/local"."""
-    k8s_yaml(kustomize(path))
+    """Applies a kustomize overlay to the cluster, for example "deployments/booking/overlays/local".
+
+    Helm charts render through the overlay's `helmCharts` field; Helm never installs them.
+    """
+    k8s_yaml(kustomize(path, flags=["--enable-helm"]))
 
 
 def project_switch_buttons(projects, active, repo_root):
@@ -34,3 +37,26 @@ def project_switch_buttons(projects, active, repo_root):
             text=text,
             icon_name="swap_horiz",
         )
+
+
+def wait_for_webhook(name, manifest, resource_deps):
+    """Adds a resource that turns ready once an admission webhook answers.
+
+    A webhook pod reports ready before the API server can call it: its Service may not
+    route yet, and cert-manager-cainjector may not have injected the CA bundle into the
+    webhook configuration. Tilt does not retry an apply that the webhook rejected. The
+    resource applies manifest (a file the webhook validates) as a server-side dry run,
+    once a second for up to three minutes.
+    """
+    local_resource(
+        name,
+        cmd=[
+            "sh",
+            "-c",
+            'for _ in $(seq 180); do kubectl apply --dry-run=server -f "$1" >/dev/null 2>&1 && exit 0; sleep 1; done; kubectl apply --dry-run=server -f "$1"',
+            "wait",
+            manifest,
+        ],
+        resource_deps=resource_deps,
+        labels=[SHARED_LABEL],
+    )

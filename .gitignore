@@ -4,6 +4,8 @@
 tilt_config.json
 .gooze-reports/
 .gooze.log
+# kustomize helmCharts download cache
+deployments/**/charts/
 # Ticket drafts; tickets are published as GitHub issues
 **/tickets/
 

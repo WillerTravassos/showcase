@@ -1,0 +1,46 @@
+# The public entry point: Cilium's Envoy on the node's ports 80 and 443 (ADR 0011). Only
+# the hosts listed here are reachable, and only through the routes in this folder, so
+# internal services never are.
+#
+# shortcut: this Gateway owns ports 80 and 443 of the node, so no other project can listen
+# there; move it to the repository deployments/ with a ListenerSet per project when a
+# second one needs them.
+#
+# shortcut: Envoy adds "server: envoy" to every response and Cilium has no setting to drop
+# it (an HTTPRoute header filter runs too early); it names the proxy only, no version or
+# host. Remove it when Cilium exposes the Envoy server header option.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: clinic-scheduler
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: patient-http
+      hostname: patient.localhost
+      port: 80
+      protocol: HTTP
+    - name: patient-https
+      hostname: patient.localhost
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: patient-localhost-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: patient-localhost-tls
+spec:
+  secretName: patient-localhost-tls
+  dnsNames:
+    - patient.localhost
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: local-ca

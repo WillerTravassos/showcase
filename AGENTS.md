@@ -11,7 +11,12 @@ mode). Read it before touching that project.
 | `online-pong/`     | Rust     | learning | `docs/standards/rust.md`, `rust-package-structure.md`      |
 | `clinic-scheduler/`| Go       | build    | `docs/standards/go.md`, `go-package-structure.md`          |
 
-Shared local infrastructure (Tilt shell, otel-lgtm, namespaces) lives in `tilt/`.
+Shared local infrastructure (Tilt shell, otel-lgtm, namespaces, the local certificate
+authority) lives in `tilt/`. Cluster platform components that every environment needs
+(Gateway API CRDs, Cilium, cert-manager, trust-manager) live in
+`deployments/<component>/`. Their Helm charts render through kustomize `helmCharts`; each
+overlay pins the chart and holds its values, since chart values do not merge from a base
+into an overlay.
 `make help` lists every command. CI runs the same make targets, so a green local run is a
 green CI run.
 

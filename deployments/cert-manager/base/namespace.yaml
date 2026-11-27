@@ -1,0 +1,6 @@
+# cert-manager and trust-manager run here; trust-manager reads trust bundle sources only
+# from this namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager

@@ -1,0 +1,10 @@
+# The local certificate authority, for local clusters only: a self-signed root that signs
+# every certificate through the local-ca ClusterIssuer, and its trust bundle.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ./bootstrap-cluster-issuer.yaml
+  - ./certificate.yaml
+  - ./cluster-issuer.yaml
+  - ./bundle.yaml

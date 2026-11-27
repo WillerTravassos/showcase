@@ -201,6 +201,42 @@
         }
       }
     },
+    "chromium@158.0.8127.36": {
+      "last_modified": "2026-11-22T18:15:35Z",
+      "resolved": "github:NixOS/nixpkgs/619c39f6eac5d1ed6b8f073a9414baf7034b2356#chromium",
+      "source": "devbox-search",
+      "version": "158.0.8127.36",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/cyghid12l9ivb5cmrmdlrd2n61j7gkqq-chromium-158.0.8127.36",
+              "default": true
+            },
+            {
+              "name": "sandbox",
+              "path": "/nix/store/3qwwr1p7jd123j4lbwh8z2s3gzm8k3ql-chromium-158.0.8127.36-sandbox"
+            }
+          ],
+          "store_path": "/nix/store/cyghid12l9ivb5cmrmdlrd2n61j7gkqq-chromium-158.0.8127.36"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/j5jzyirg5xsmiikjy2bpnwhnn2l78dby-chromium-158.0.8127.36",
+              "default": true
+            },
+            {
+              "name": "sandbox",
+              "path": "/nix/store/i21kza8m9zbw9sbp0cnyqw5ydk3apyl4-chromium-158.0.8127.36-sandbox"
+            }
+          ],
+          "store_path": "/nix/store/j5jzyirg5xsmiikjy2bpnwhnn2l78dby-chromium-158.0.8127.36"
+        }
+      }
+    },
     "ctlptl@0.9.6": {
       "last_modified": "2026-11-06T15:06:19Z",
       "resolved": "github:NixOS/nixpkgs/4fe25e12eb9f4c744966dd3de5a05246cf098601#ctlptl",
@@ -821,6 +857,44 @@
             }
           ],
           "store_path": "/nix/store/8z4xajk9snqs3xdhdq4f8cdj019s3bwg-kubectl-1.37.1"
+        }
+      }
+    },
+    "kubernetes-helm@4.3.2": {
+      "last_modified": "2026-11-22T18:15:35Z",
+      "resolved": "github:NixOS/nixpkgs/619c39f6eac5d1ed6b8f073a9414baf7034b2356#kubernetes-helm",
+      "source": "devbox-search",
+      "version": "4.3.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ds670ri2ny936bh0ikjnmwn3rl1lhb01-kubernetes-helm-4.3.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ds670ri2ny936bh0ikjnmwn3rl1lhb01-kubernetes-helm-4.3.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jsc4d154qyhhmbqzlk8fbdqrf42pwasn-kubernetes-helm-4.3.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jsc4d154qyhhmbqzlk8fbdqrf42pwasn-kubernetes-helm-4.3.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gb1ghwb4kdp1cj1m9afgfifxzh900q2l-kubernetes-helm-4.3.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gb1ghwb4kdp1cj1m9afgfifxzh900q2l-kubernetes-helm-4.3.2"
         }
       }
     },

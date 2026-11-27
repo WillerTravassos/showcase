@@ -1,0 +1,7 @@
+# Signs only the local CA certificate itself (a self-signed root).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: local-ca-bootstrap
+spec:
+  selfSigned: {}

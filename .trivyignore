@@ -1,0 +1,3 @@
+# Kubernetes readiness probes replace Dockerfile HEALTHCHECK, and distroless images have
+# no shell to run one.
+DS-0026

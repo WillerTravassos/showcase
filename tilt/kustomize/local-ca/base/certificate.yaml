@@ -1,0 +1,18 @@
+# The local root certificate authority, stored in the Secret local-ca.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: local-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: Showcase local CA
+  secretName: local-ca
+  duration: 8760h # 1 year; trust-manager republishes the bundle on renewal
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: local-ca-bootstrap
