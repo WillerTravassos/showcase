@@ -1,6 +1,7 @@
 package ingress
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -8,20 +9,16 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web"
+	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web/pages"
 )
 
-// home renders the patient portal home page in English.
-//
-// shortcut: the language is always English; ticket #3 picks it from the patient's choice
-// and Accept-Language.
+// home renders the patient portal home page in the patient's language.
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	localizer := i18n.NewLocalizer(h.catalogue, "en")
 
-	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
+	view, err := h.homeView(r, h.localizer(r))
 	if err == nil {
-		err = web.Home(web.HomeView{Lang: "en", PortalName: name}).Render(ctx, w)
+		err = pages.Home(view).Render(ctx, w)
 	}
 
 	if err != nil {
@@ -36,4 +33,19 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
+}
+
+// homeView localizes the home page that r asked for.
+func (h *Handler) homeView(r *http.Request, localizer *i18n.Localizer) (pages.HomeView, error) {
+	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
+	if err != nil {
+		return pages.HomeView{}, fmt.Errorf("localize PortalName: %w", err)
+	}
+
+	layout, err := h.layoutView(r, localizer, name)
+	if err != nil {
+		return pages.HomeView{}, err
+	}
+
+	return pages.HomeView{Layout: layout, PortalName: name}, nil
 }

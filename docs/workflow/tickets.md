@@ -76,6 +76,10 @@ Then ...
 ## Notes
 <Optional design hints. Non-binding: a better design that passes the scenarios wins.>
 
+## Compliance
+<For projects that keep a compliance matrix: each criterion this ticket covers, what the
+ticket delivers for it, and whether it closes the criterion. "None" when it covers none.>
+
 ## Done when
 - Every approved scenario passes as an acceptance test.
 - `make <lang>-verify PROJECT=<project>` is green.

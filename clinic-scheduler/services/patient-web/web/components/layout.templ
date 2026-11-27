@@ -1,0 +1,50 @@
+package components
+
+// LayoutView is the view model of the page layout, already localized.
+type LayoutView struct {
+	// Lang is the BCP 47 language tag of the page, for example "en".
+	Lang string
+	// Theme is the theme the patient picked, "light" or "dark", or "" to follow the
+	// device's colour scheme preference.
+	Theme string
+	// Title is the page title the browser shows.
+	Title string
+	// LanguageSwitch switches the page to the other language.
+	LanguageSwitch LanguageSwitchView
+	// ThemeSwitch switches the page's colour theme.
+	ThemeSwitch ThemeSwitchView
+	// Version labels the application version, for example "Version 1a46e7b".
+	Version string
+}
+
+// Layout renders the document every patient portal page shares (head, stylesheet,
+// header with the language and theme switches, footer with the version) around the page's main
+// content.
+templ Layout(v LayoutView) {
+	<!DOCTYPE html>
+	<html
+		lang={ v.Lang }
+		if v.Theme != "" {
+			data-theme={ v.Theme }
+		}
+	>
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ v.Title }</title>
+			<link rel="stylesheet" href="/static/app.css"/>
+		</head>
+		<body class="bg-bg text-text">
+			<header>
+				@LanguageSwitch(v.LanguageSwitch)
+				@ThemeSwitch(v.ThemeSwitch)
+			</header>
+			<main>
+				{ children... }
+			</main>
+			<footer>
+				<p>{ v.Version }</p>
+			</footer>
+		</body>
+	</html>
+}

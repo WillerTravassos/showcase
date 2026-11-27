@@ -1,0 +1,38 @@
+/* Patient portal styles: the ADR 0013 theme tokens as Tailwind v4 theme variables.
+   `go generate` in web/ builds static/app.css from this file. */
+@import "tailwindcss";
+
+@source "../**/*.templ";
+
+/* Each token is light-dark(<light>, <dark>): the browser picks the value for the page's
+   color-scheme, which follows the device unless the patient picked a theme. */
+@theme {
+  --color-bg: light-dark(#ffffff, #0f172a);
+  --color-surface: light-dark(#f8fafc, #1e293b);
+  --color-text: light-dark(#0f172a, #f1f5f9);
+  --color-muted: light-dark(#475569, #94a3b8);
+  --color-primary: light-dark(#4f46e5, #a5b4fc);
+  --color-on-primary: light-dark(#ffffff, #1e1b4b);
+  --color-accent: light-dark(#be123c, #fda4af);
+  --color-on-accent: light-dark(#ffffff, #4c0519);
+  --color-accent-soft: light-dark(#ffe4e6, #4c0519);
+  --color-available: light-dark(#eef2ff, #1e1b4b);
+  --color-success: light-dark(#15803d, #86efac);
+  --color-warning: light-dark(#b45309, #fcd34d);
+  --color-danger: light-dark(#b91c1c, #fca5a5);
+  --color-border: light-dark(#64748b, #64748b);
+}
+
+/* The server sets data-theme from the patient's theme cookie, so the picked theme shows
+   on first paint. Form controls and scrollbars follow the same scheme. */
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}

@@ -38,9 +38,9 @@ Ask before adding, merging, or splitting a service.
   auto-escape by context. This replaces the `html/template` rule in `security.md`. Never
   render HTML with `text/template` or string concatenation. See ADR 0001.
 - **Page structure**: each page or fragment is an `ingress` handler (controller), a view
-  model struct defined next to its templ component in `web/`, and the component. No
-  presenter interfaces, no base view model, and domain types never reach a template. See
-  ADR 0002.
+  model struct defined next to its templ component (`web/pages` for full pages,
+  `web/components` for the layout and fragments), and the component. No presenter
+  interfaces, no base view model, and domain types never reach a template. See ADR 0002.
 - **API layout**: a service's `api/` holds `.proto` files and generated ConnectRPC code
   for internal calls (buf), or an OpenAPI spec and generated ogen code for a public API
   (`fhir-gateway` only). This replaces the OpenAPI-only `api/` in

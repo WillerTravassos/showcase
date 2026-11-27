@@ -7,6 +7,7 @@ import (
 	"fmt"
 	nethttp "net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/WillerTravassos/showcase/clinic-scheduler/test/acceptance/driver/browser"
@@ -23,7 +24,12 @@ const (
 // HomePage is what a patient sees on the patient portal home page.
 type HomePage struct {
 	Heading string
+	// Version is the application version the page shows, or "" when it shows none.
+	Version string
 }
+
+// shownVersion finds the application version in a page footer such as "Version 1a46e7b".
+var shownVersion = regexp.MustCompile(`Version\s+(\S+)`)
 
 // OpenPatientPortalHome opens the patient portal home page over HTTPS, trusting only the
 // local certificate authority. It fails when the page does not load or its certificate
@@ -43,7 +49,12 @@ func OpenPatientPortalHome(ctx context.Context) (*HomePage, error) {
 		return nil, fmt.Errorf("open the patient portal: status %d", page.Status)
 	}
 
-	return &HomePage{Heading: strings.TrimSpace(page.Document.Find("h1").First().Text())}, nil
+	var version string
+	if match := shownVersion.FindStringSubmatch(page.Document.Find("footer").Text()); match != nil {
+		version = match[1]
+	}
+
+	return &HomePage{Heading: strings.TrimSpace(page.Document.Find("h1").First().Text()), Version: version}, nil
 }
 
 // OpenPatientPortalOverPlainHTTP opens the patient portal with http:// and returns the

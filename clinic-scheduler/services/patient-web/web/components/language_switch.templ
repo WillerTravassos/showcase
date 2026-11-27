@@ -1,0 +1,19 @@
+package components
+
+// LanguageSwitchView is the view model of the language switch, already localized.
+type LanguageSwitchView struct {
+	// Lang is the BCP 47 language tag the switch changes to, for example "fr".
+	Lang string
+	// Label names that language in itself, for example "Français".
+	Label string
+	// Return is the path of the current page, where the patient lands after switching.
+	Return string
+}
+
+// LanguageSwitch renders a form that switches the portal to another language.
+templ LanguageSwitch(v LanguageSwitchView) {
+	<form method="post" action="/preferences">
+		<input type="hidden" name="return" value={ v.Return }/>
+		<button type="submit" name="lang" value={ v.Lang } lang={ v.Lang }>{ v.Label }</button>
+	</form>
+}

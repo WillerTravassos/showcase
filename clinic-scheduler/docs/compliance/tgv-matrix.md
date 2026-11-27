@@ -180,7 +180,7 @@ When a ticket closes a criterion, add the ticket number to its row.
 | S06.08 | Sécurité | Contrôle des accès | Votre application permet de préserver la confidentialité des mots de passe et elle ne capture ou n'entrepose en aucun cas les mots de passe utilisés… | story | 1.3 |  |
 | S06.09 | Sécurité | Contrôle des accès | Lorsqu'il est géré par votre application, chaque utilisateur doit pouvoir changer son mot de passe. | story | 1.3 |  |
 | S06.10 | Sécurité | Contrôle des accès | Les communications entre les différentes composantes de votre application doivent être authentifiées et celles-ci doivent avoir le minimum de… | story | 11.1 |  |
-| S06.11 | Sécurité | Contrôle des accès | Votre application et les systèmes permettant son fonctionnement ne comportent aucun mot de passe dans des scripts automatisés, des macros, le code… | story | 0.1 |  |
+| S06.11 | Sécurité | Contrôle des accès | Votre application et les systèmes permettant son fonctionnement ne comportent aucun mot de passe dans des scripts automatisés, des macros, le code… | story | 0.1 | Ticket 001 |
 | S06.12 | Sécurité | Contrôle des accès | Votre application dispose de fonctionnalités permettant de faciliter la revue des accès. | story | 10.4 |  |
 | S06.13 | Sécurité | Contrôle des accès | La gestion des accès repose sur des profils basés sur les fonctionnalités de votre application. Ces profils sont paramétrés de façon à pouvoir… | story | 2.1, 2.10 |  |
 | S06.14 | Sécurité | Contrôle des accès | Votre application comporte des fonctionnalités permettant à son acquéreur d'en gérer aisément les accès. | story | 2.6 |  |
@@ -228,7 +228,7 @@ When a ticket closes a criterion, add the ticket number to its row.
 | S11.03 | Sécurité | Sécurité des communications | Cloisonner l'environnement d'exécution de votre application de manière à compartimenter les éléments ne nécessitant ni des mêmes droits ni des mêmes… | story | 11.2 |  |
 | S11.04 | Sécurité | Sécurité des communications | Si votre application utilise le service de courrier électronique, celui-ci ne traite pas d'information confidentielle, à moins que des mécanismes de… | story | 5.2 |  |
 | S11.05 | Sécurité | Sécurité des communications | Planifier en continu des campagnes de simulation à l'hameçonnage afin de sensibiliser les intervenants (sous votre responsabilité) à l'écosystème de… | org |  | Organizational process, outside the software |
-| S11.06 | Sécurité | Sécurité des communications | Veiller à ce que la connectivité soit sécuritaire. | story | 0.2 |  |
+| S11.06 | Sécurité | Sécurité des communications | Veiller à ce que la connectivité soit sécuritaire. | story | 0.2 | Ticket 002 |
 | S12.01 | Sécurité | Acquisition, développement et maintenance des systèmes d'information | Les intervenants sous votre responsabilité de l'écosystème de votre PST doivent bénéficier en continu d'un plan de formation en cybersécurité sur : -… | org |  | Organizational process, outside the software |
 | S12.02 | Sécurité | Acquisition, développement et maintenance des systèmes d'information | Considérer la sécurité à chacune des étapes du développement de votre application. | story | 0.1 | Ticket 001 |
 | S12.03 | Sécurité | Acquisition, développement et maintenance des systèmes d'information | Veiller à ce que vos environnements de développement, de test et d'exploitation soient distincts. | out of scope |  | Only a local environment is planned |
@@ -263,7 +263,7 @@ When a ticket closes a criterion, add the ticket number to its row.
 | PF05 | Performance | Performance | Documenter les temps de réponse qu'on doit attendre du PST dans les meilleures et pires conditions. | story + doc | 11.6, E12 |  |
 | PF06 | Performance | Performance | Documenter la gestion des paquets par le PST en précisant le taux de perte de paquets qu'il peut supporter sans perte de communication ou de données,… | doc | E12 |  |
 | PF07 | Performance | Performance | Documenter les délais de rétention et d'interruption de connexion que le PST peut supporter sans perte de communication ou de données. Il faudra… | doc | E12 |  |
-| T01 | Technologie | Technologie | Veiller à ce que votre application respecte les normes d’accessibilité Web du Conseil du Trésor du Québec. | story | 0.2 |  |
+| T01 | Technologie | Technologie | Veiller à ce que votre application respecte les normes d’accessibilité Web du Conseil du Trésor du Québec. | story | 0.2 | Ticket 003 |
 | T02 | Technologie | Technologie | Lorsqu'il y a arrimage avec les actifs informationnels d'intérêt commun, veiller à ce que votre PST permette de saisir l'annuaire des comptes… | story | 11.3 |  |
 | T03 | Technologie | Technologie | Lorsqu'il y a arrimage avec les actifs informationnels d'intérêt commun, votre PST permet de s'arrimer avec le service de fédération d'identité… | story | 11.3 |  |
 | T04 | Technologie | Technologie | Décrire l’architecture technologique qui doit supporter l'installation et l'utilisation de votre PST. | doc | E12 |  |
@@ -289,8 +289,8 @@ When a ticket closes a criterion, add the ticket number to its row.
 | T24 | Technologie | Technologie | Hébergement infonuagique en priorité | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |
 | T25 | Technologie | Technologie | Mettre en place des espaces d'environnements distincts et isolés (Développement, Tests, Préproduction, Production). | out of scope |  | Only a local environment is planned |
 | T26 | Technologie | Technologie | Mettre en place ou arrimer avec les mécanismes de plan de reprise en vigueur au Secrétariat du Conseil du Trésor | out of scope |  | Hosting, environments, or provincial services beyond a local cluster |
-| G01 | Général | Général | Le produit ou le service technologique doit offrir une interface en français pour ses utilisateurs. | story | 0.2 |  |
-| G02 | Général | Général | Le produit ou service technologique ne doit pas présenter de la publicité. | story | 0.2 |  |
+| G01 | Général | Général | Le produit ou le service technologique doit offrir une interface en français pour ses utilisateurs. | story | 0.2 | Ticket 003 |
+| G02 | Général | Général | Le produit ou service technologique ne doit pas présenter de la publicité. | story | 0.2 | Ticket 003 |
 | I01 | Interopérabilité | Interopérabilité | La solution doit supporter l'utilisation d'un service d'authentification externe (protocole LDAP et LDAPS). | story | 11.3 |  |
 | I02 | Interopérabilité | Interopérabilité | Votre solution s'appuie sur ou est compatible avec un système d'exploitation, des composantes, et un un système de gestion de base de données récents… | story | 0.1 |  |
 | I03 | Interopérabilité | Interopérabilité | Lorsque nécessaire, la solution peut invoquer la librairie cryptographique du poste de travail Windows (ou de la session Citrix/TS) afin d’effectuer… | n/a |  | Web application; patients enter their own information |

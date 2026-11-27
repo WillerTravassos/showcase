@@ -268,6 +268,11 @@ linters:
       - path: '/web/'
         text: 'package has more than one godoc'
         linters: [ godoclint ]
+      # templ's generated render functions count towards cyclop's package average, which
+      # the hand-written code in web/ cannot balance.
+      - path: '/web/'
+        text: 'the average complexity for the package'
+        linters: [ cyclop ]
       - source: 'TODO'
         linters: [ godot ]
       - path: '_test\.go'

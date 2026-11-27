@@ -123,6 +123,26 @@ go-arch: ## Check package dependency rules (go-arch-lint)
 go-mocks: ## Regenerate fakes from .mockery.yml
 	@cd $(PROJECT_DIR) && mockery
 
+.PHONY: go-generate
+go-generate: ## Regenerate committed code and assets from //go:generate lines (templ, Tailwind)
+	@cd $(PROJECT_DIR) && go generate ./...
+
+# Generated files are committed, so a stale one ships without a build error. The check
+# compares them before and after regenerating rather than against git, so it passes on
+# uncommitted work that is already regenerated.
+.PHONY: go-generate-check
+go-generate-check: ## Fail when a committed generated file is out of date with its source
+	@cd $(PROJECT_DIR) && sums() { \
+		find . -type f \( -name '*_templ.go' -o -path '*/web/static/*' \) -print0 | sort -z | xargs -0 -r sha256sum; \
+	}; \
+	before=$$(sums); \
+	out=$$(go generate ./... 2>&1) || { echo "$$out"; exit 1; }; \
+	if [ "$$before" != "$$(sums)" ]; then \
+		echo "Generated files were out of date and have been regenerated; review and commit them:"; \
+		git status --short -- '*_templ.go' '*/web/static/*'; \
+		exit 1; \
+	fi
+
 .PHONY: go-test
 go-test: ## Run unit tests with the race detector
 	@cd $(PROJECT_DIR) && go test -race $$(go list ./... | grep -v '/test/')
@@ -144,7 +164,7 @@ go-vuln: ## Check dependencies and code for known vulnerabilities (govulncheck)
 	@cd $(PROJECT_DIR) && govulncheck ./...
 
 .PHONY: go-verify
-go-verify: go-lint go-arch go-test go-vuln secrets-scan ## Everything a change must pass before review
+go-verify: go-generate-check go-lint go-arch go-test go-vuln secrets-scan ## Everything a change must pass before review
 
 .PHONY: go-tidy
 go-tidy: ## Tidy and verify the Go module

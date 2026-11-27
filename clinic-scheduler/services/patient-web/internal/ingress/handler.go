@@ -10,6 +10,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/WillerTravassos/showcase/clinic-scheduler/services/patient-web/web"
 )
 
 // maxBodyBytes bounds every request body; the portal has no uploads.
@@ -24,19 +26,37 @@ const contentSecurityPolicy = "default-src 'self'; base-uri 'none'; form-action 
 type Handler struct {
 	logger    *slog.Logger
 	catalogue *i18n.Bundle
+	// version is the application version every page shows.
+	version string
 }
 
-// NewHandler returns the patient portal's root [http.Handler]. Every response carries the
-// security headers, every request body is limited, and every request gets a server span
-// from tracerProvider.
-func NewHandler(logger *slog.Logger, catalogue *i18n.Bundle, tracerProvider trace.TracerProvider) http.Handler {
-	h := &Handler{logger: logger, catalogue: catalogue}
+// NewHandler returns the patient portal's root [http.Handler]. Every page shows version,
+// every response carries the security headers, every request body is limited, and every
+// request gets a server span from tracerProvider.
+func NewHandler(
+	logger *slog.Logger,
+	catalogue *i18n.Bundle,
+	version string,
+	tracerProvider trace.TracerProvider,
+) http.Handler {
+	h := &Handler{logger: logger, catalogue: catalogue, version: version}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", h.home)
+	mux.HandleFunc("POST /preferences", h.savePreferences)
+	mux.Handle("GET /static/", http.FileServerFS(web.Static))
+
+	// CrossOriginProtection rejects state-changing requests that a browser sends from
+	// another site (CSRF, cross-site request forgery).
+	csrf := http.NewCrossOriginProtection().Handler(routeAttribute(mux))
+
 	// otelhttp reads the route from the request the mux matched, so nothing between them
 	// may copy the request (http.MaxBytesHandler does).
-	traced := otelhttp.NewHandler(securityHeaders(routeAttribute(mux)), "patient-web",
-		otelhttp.WithTracerProvider(tracerProvider), otelhttp.WithSpanNameFormatter(spanName))
+	traced := otelhttp.NewHandler(
+		securityHeaders(csrf),
+		"patient-web",
+		otelhttp.WithTracerProvider(tracerProvider),
+		otelhttp.WithSpanNameFormatter(spanName),
+	)
 
 	return http.MaxBytesHandler(traced, maxBodyBytes)
 }
