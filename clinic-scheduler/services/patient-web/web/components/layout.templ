@@ -8,10 +8,13 @@ type LayoutView struct {
 	Title string
 	// LanguageSwitch switches the page to the other language.
 	LanguageSwitch LanguageSwitchView
+	// Version labels the application version, for example "Version 1a46e7b".
+	Version string
 }
 
 // Layout renders the document every patient portal page shares (head, stylesheet,
-// header with the language switch) around the page's main content.
+// header with the language switch, footer with the version) around the page's main
+// content.
 templ Layout(v LayoutView) {
 	<!DOCTYPE html>
 	<html lang={ v.Lang }>
@@ -28,6 +31,9 @@ templ Layout(v LayoutView) {
 			<main>
 				{ children... }
 			</main>
+			<footer>
+				<p>{ v.Version }</p>
+			</footer>
 		</body>
 	</html>
 }

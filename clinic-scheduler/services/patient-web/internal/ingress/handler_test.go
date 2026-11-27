@@ -27,7 +27,7 @@ func newHandler(t *testing.T) (http.Handler, *tracetest.SpanRecorder) {
 	provider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(spans))
 	logger := slog.New(slog.DiscardHandler)
 
-	return ingress.NewHandler(logger, catalogue, provider), spans
+	return ingress.NewHandler(logger, catalogue, "1.2.3", provider), spans
 }
 
 func get(t *testing.T, handler http.Handler, target string) *http.Response {
@@ -52,6 +52,14 @@ func TestHomeShowsThePortalNameInEnglish(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Contains(t, string(body), `<html lang="en">`)
 	assert.Contains(t, string(body), "<h1>Patient portal</h1>")
+}
+
+func TestHomeShowsTheApplicationVersion(t *testing.T) {
+	t.Parallel()
+
+	body := homeBody(t, map[string]string{"Cookie": "lang=fr"})
+
+	assert.Contains(t, body, "<footer><p>Version 1.2.3</p></footer>")
 }
 
 func TestEveryResponseForbidsFramingAndSniffing(t *testing.T) {

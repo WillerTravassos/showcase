@@ -1,2 +1,3 @@
 PortalName = "Patient portal"
 SwitchLanguage = "Français"
+Version = "Version {{.Version}}"

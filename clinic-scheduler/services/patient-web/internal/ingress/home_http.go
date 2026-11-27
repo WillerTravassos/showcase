@@ -16,7 +16,7 @@ import (
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	view, err := homeView(h.localizer(r), r.URL.Path)
+	view, err := h.homeView(h.localizer(r), r.URL.Path)
 	if err == nil {
 		err = pages.Home(view).Render(ctx, w)
 	}
@@ -36,13 +36,13 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 }
 
 // homeView localizes the home page for the page at path.
-func homeView(localizer *i18n.Localizer, path string) (pages.HomeView, error) {
+func (h *Handler) homeView(localizer *i18n.Localizer, path string) (pages.HomeView, error) {
 	name, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: "PortalName"})
 	if err != nil {
 		return pages.HomeView{}, fmt.Errorf("localize PortalName: %w", err)
 	}
 
-	layout, err := layoutView(localizer, path, name)
+	layout, err := h.layoutView(localizer, path, name)
 	if err != nil {
 		return pages.HomeView{}, err
 	}

@@ -92,7 +92,7 @@ func serve(ctx context.Context, logger *slog.Logger, cfg config.Config, version 
 	}
 
 	server := &http.Server{
-		Handler:           ingress.NewHandler(logger, catalogue, otel.GetTracerProvider()),
+		Handler:           ingress.NewHandler(logger, catalogue, version, otel.GetTracerProvider()),
 		ReadHeaderTimeout: readHeaderTimeout,
 		ReadTimeout:       readTimeout,
 		WriteTimeout:      writeTimeout,

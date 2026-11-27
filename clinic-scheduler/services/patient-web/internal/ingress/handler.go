@@ -26,13 +26,20 @@ const contentSecurityPolicy = "default-src 'self'; base-uri 'none'; form-action 
 type Handler struct {
 	logger    *slog.Logger
 	catalogue *i18n.Bundle
+	// version is the application version every page shows.
+	version string
 }
 
-// NewHandler returns the patient portal's root [http.Handler]. Every response carries the
-// security headers, every request body is limited, and every request gets a server span
-// from tracerProvider.
-func NewHandler(logger *slog.Logger, catalogue *i18n.Bundle, tracerProvider trace.TracerProvider) http.Handler {
-	h := &Handler{logger: logger, catalogue: catalogue}
+// NewHandler returns the patient portal's root [http.Handler]. Every page shows version,
+// every response carries the security headers, every request body is limited, and every
+// request gets a server span from tracerProvider.
+func NewHandler(
+	logger *slog.Logger,
+	catalogue *i18n.Bundle,
+	version string,
+	tracerProvider trace.TracerProvider,
+) http.Handler {
+	h := &Handler{logger: logger, catalogue: catalogue, version: version}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", h.home)
 	mux.HandleFunc("POST /preferences", h.savePreferences)
